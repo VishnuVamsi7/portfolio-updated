@@ -14,20 +14,20 @@ export default function Training() {
       url: "https://drive.google.com/file/d/1vfwdtApeBbuBDXGIz6kQlRlnM9carL4l/view?pli=1"
     },
     {
-      title: "C++ Programming",
-      provider: "HPE Data Science Institute, University of Houston",
+      title: "Excel Skills Virtual Experience Program",
+      provider: "JPmorgan Chase & Co.",
       category: "Programming",
       url: "https://drive.google.com/file/d/1Ku-XlpDOvuloEWTM1Qm2uxwfD_qAHMy4/view"
     },
     {
-      title: "Excel for Applied Data Science",
-      provider: "HPE Data Science Institute, University of Houston",
+      title: "Analyzing Marketing Campaigns with pandas",
+      provider: "DataCamp",
       category: "Data Science",
       url: "https://drive.google.com/file/d/1T__i5CDCgMj0wfqXLmF8GxEp_hfwfMU1/view"
     },
     {
-      title: "Excel & Power BI",
-      provider: "HPE Data Science Institute, University of Houston",
+      title: "Data Manipulation in SQL",
+      provider: "DataCamp",
       category: "Data Analytics",
       url: "https://drive.google.com/file/d/1JVmgIZ1m9MF54SNoaKlayC6FzFPm0NWQ/view"
     }
