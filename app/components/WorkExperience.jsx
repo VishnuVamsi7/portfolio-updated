@@ -1,6 +1,20 @@
 export default function WorkExperience() {
   const experiences = [
     {
+      title: "Software Engineering Fellow",
+      company: "Develop for Good (Client: Rasdo NGO)",
+      location: "Remote",
+      period: "November 2025 - Present",
+      type: "Volunteer",
+      highlights: [
+        "Led the technical development of the official Rasdo NGO website, taking the project from initial Figma mockups to final production deployment using Wix.",
+        "Integrated the Flutterwave API via custom button logic to enable cross-border donations, ensuring compliance with Ugandan financial regulations and enabling 100% fund retention.",
+        "Worked in an Agile environment with Product Managers and UX Designers, conducting weekly sprints and code reviews to ensure design fidelity and usability.",
+        "Delivered a sustainable, zero-maintenance platform that serves as the organization's primary tool for international fundraising and donor verification."
+      ],
+      color: "from-orange-500 to-red-600"
+    },
+    {
       title: "ML Engineer",
       company: "AI/ML Research Intern",
       location: "",
@@ -42,6 +56,21 @@ export default function WorkExperience() {
         "Discovered that pink slime journalism favors overly positive tone, minimal sentence depth, and active voice dominance. Visualizations (t-SNE, heatmaps, boxplots) revealed stark readability and stylistic contrasts — laying the groundwork for misinformation detection tools and future classification models."
       ],
       color: "from-green-500 to-teal-600"
+    },
+    {
+      title: "Software Developer",
+      company: "Yoshops",
+      location: "Remote",
+      period: "2024 - 2025",
+      type: "Project",
+      highlights: [
+        "Developed comprehensive web scraping solutions using Python (BeautifulSoup, Selenium, Scrapy) to extract market data, product information, and competitive intelligence from multiple e-commerce platforms, enabling data-driven business decisions.",
+        "Conducted extensive exploratory data analysis (EDA) on large-scale datasets, utilizing pandas, NumPy, and visualization libraries (Matplotlib, Seaborn) to identify trends, patterns, and actionable insights that informed strategic business planning.",
+        "Built automated workflows and scripts to streamline repetitive data processing tasks, reducing manual effort by 60% and improving operational efficiency across multiple business functions.",
+        "Designed and implemented billing system modules with transaction management, invoice generation, and payment tracking capabilities, ensuring accuracy and reliability in financial operations.",
+        "Leveraged Python programming expertise to develop scalable, maintainable solutions across web scraping, data analysis, automation, and system integration projects."
+      ],
+      color: "from-yellow-500 to-amber-600"
     }
   ];
 

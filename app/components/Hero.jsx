@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 export default function Hero() {
   const [showChatPrompt, setShowChatPrompt] = useState(false);
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
 
   useEffect(() => {
     // Show chat prompt after 3 seconds
@@ -14,8 +15,11 @@ export default function Hero() {
   }, []);
 
   const downloadResume = () => {
-    // Placeholder for resume download
-    alert('Resume download functionality will be implemented here.');
+    setIsResumeOpen(true);
+  };
+
+  const closeResumeModal = () => {
+    setIsResumeOpen(false);
   };
 
   return (
@@ -56,9 +60,10 @@ export default function Hero() {
             className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-2xl hover:shadow-blue-500/50 transform hover:scale-105"
           >
             <span className="relative z-10 flex items-center gap-2">
-              DOWNLOAD RESUME
-              <svg className="w-5 h-5 group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              VIEW RESUME
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </span>
             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-400 to-indigo-400 opacity-0 group-hover:opacity-100 blur transition-opacity -z-10"></div>
@@ -102,6 +107,37 @@ export default function Hero() {
           </div>
         </div>
       </div>
+
+      {/* Resume Preview Modal */}
+      {isResumeOpen && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center animate-fade-in"
+          onClick={closeResumeModal}
+        >
+          <div 
+            className="relative h-[90vh] w-[90vw] max-w-6xl bg-white rounded-lg shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={closeResumeModal}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-gray-800 hover:bg-gray-900 text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+              aria-label="Close modal"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* PDF Display */}
+            <iframe
+              src="/resume/VishnuVamsi_AIEngineer.pdf"
+              className="w-full h-full border-0"
+              title="Resume Preview"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
