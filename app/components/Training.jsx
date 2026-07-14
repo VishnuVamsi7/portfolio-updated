@@ -1,3 +1,6 @@
+import SectionBackground from './effects/SectionBackground';
+import SectionReveal, { StaggerReveal, StaggerItem } from './effects/SectionReveal';
+
 export default function Training() {
   const certifications = [
     {
@@ -34,66 +37,67 @@ export default function Training() {
   ];
 
   return (
-    <section id="training" className="relative py-24 bg-gradient-to-b from-white via-blue-50/30 to-white">
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="text-center mb-16 animate-slide-up">
-          <span className="inline-block px-4 py-2 text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-100 rounded-full mb-4">
-            Professional Development
-          </span>
-          <h2 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4">
-            Training & <span className="text-gradient">Certifications</span>
-          </h2>
-          <p className="text-gray-600 text-lg">Continuous learning and skill development</p>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full mt-4"></div>
-        </div>
+    <section id="training" className="relative isolate bg-transparent py-24">
+      <SectionBackground variant="radial" />
+      <div className="container relative mx-auto px-4">
+        <StaggerReveal className="mb-16 text-center">
+          <StaggerItem><span className="section-label">Professional Development</span></StaggerItem>
+          <StaggerItem>
+            <h2 className="section-title">
+              Training & <span className="text-gradient">Certifications</span>
+            </h2>
+          </StaggerItem>
+          <StaggerItem>
+            <p className="text-lg text-ink-secondary">Continuous learning and skill development</p>
+          </StaggerItem>
+          <StaggerItem><div className="section-divider" /></StaggerItem>
+        </StaggerReveal>
 
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {certifications.map((cert, index) => (
-              <a
-                key={index}
-                href={cert.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative bg-white rounded-2xl p-6 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] animate-slide-up block"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                {/* Certificate Icon */}
-                <div className="absolute -top-3 -right-3 w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg transform rotate-12 group-hover:rotate-0 transition-transform duration-300">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                </div>
-                
-                <div className="mt-2">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                    {cert.title}
-                  </h3>
-                  <div className="flex items-center gap-2 text-gray-600 mb-3 text-sm">
-                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <SectionReveal key={index} delay={index * 0.05}>
+                <a
+                  href={cert.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass glass-hover group relative block rounded-2xl p-6 transition-transform hover:scale-[1.02]"
+                >
+                  <div className="absolute -right-3 -top-3 flex h-14 w-14 rotate-12 items-center justify-center rounded-xl bg-gradient-primary shadow-glow-sm transition-transform duration-300 group-hover:rotate-0">
+                    <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                     </svg>
-                    <span className="font-medium line-clamp-1">{cert.provider}</span>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full text-xs font-semibold shadow-md">
-                      {cert.category}
-                    </span>
-                    {cert.year && (
-                      <span className="text-xs text-gray-500 font-medium">{cert.year}</span>
-                    )}
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-gray-100">
-                    <span className="text-xs text-blue-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
-                      View Certificate
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+
+                  <div className="mt-2">
+                    <h3 className="font-display line-clamp-2 text-xl font-bold text-ink-primary transition-colors group-hover:text-accent-bright">
+                      {cert.title}
+                    </h3>
+                    <div className="mb-3 mt-2 flex items-center gap-2 text-sm text-ink-secondary">
+                      <svg className="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
-                    </span>
+                      <span className="line-clamp-1 font-medium">{cert.provider}</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-block rounded-full bg-gradient-primary px-3 py-1 text-xs font-semibold text-white shadow-glow-sm">
+                        {cert.category}
+                      </span>
+                      {cert.year && (
+                        <span className="text-xs font-medium text-ink-muted">{cert.year}</span>
+                      )}
+                    </div>
+                    <div className="mt-3 border-t border-line-subtle pt-3">
+                      <span className="flex items-center gap-1 text-xs font-semibold text-accent-bright transition-all group-hover:gap-2">
+                        View Certificate
+                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </a>
+                </a>
+              </SectionReveal>
             ))}
           </div>
         </div>
@@ -101,5 +105,3 @@ export default function Training() {
     </section>
   );
 }
-
-

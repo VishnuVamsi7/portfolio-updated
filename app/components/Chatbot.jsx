@@ -1,91 +1,105 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { springOverlay } from '../lib/motion';
+
+const RAG_ENDPOINT = 'https://chatbot-rag-mun6.onrender.com/receive';
 
 export default function Chatbot() {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState('chat');
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hello! I'm your AI assistant. Ask me anything about Sai Vishnu Vamsi Senagasetty, his projects, skills, or background!"
-    }
+      content:
+        "Hello! I'm your AI assistant. Ask me anything about Sai Vishnu Vamsi Senagasetty, his projects, skills, or background. Switch to **JD Fit** to paste a job description.",
+    },
   ]);
   const [input, setInput] = useState('');
+  const [jdText, setJdText] = useState('');
+  const [jdResult, setJdResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     const currentInput = input;
     setInput('');
     setIsLoading(true);
-
-    // Call Render server directly, just like the old HTML site
-    const endpoint = 'https://chatbot-rag-mun6.onrender.com/receive';
 
     const maxRetries = 3;
     let attempt = 0;
 
     while (attempt < maxRetries) {
       try {
-        console.log(`Attempt ${attempt + 1}: Sending request to ${endpoint}`);
-        const response = await fetch(endpoint, {
+        const response = await fetch(RAG_ENDPOINT, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message: currentInput })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: currentInput }),
         });
-
-        console.log(`Response status: ${response.status}`);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `HTTP ${response.status} from ${endpoint}`);
+          throw new Error(errorData.error || `HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        const reply = data.response || data.error || "No response received.";
-        
-        const botResponse = {
-          role: 'assistant',
-          content: reply
-        };
-        setMessages(prev => [...prev, botResponse]);
+        const reply = data.response || data.error || 'No response received.';
+        setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
         setIsLoading(false);
         return;
-      } catch (error) {
+      } catch (err) {
         attempt++;
-        console.error(`Attempt ${attempt} failed:`, error);
-        
-        // Check if it's a network error
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          console.error('Network error - is the Next.js server running?');
-        }
-        
         if (attempt === maxRetries) {
-          console.error('Error sending message after retries:', error);
-          let errorMessage = "Failed to connect to server after retries.";
-          
-          if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            errorMessage = "Network error: Could not reach the API. Please make sure the Next.js server is running and try again.";
-          } else if (error.message) {
-            errorMessage = error.message;
-          } else {
-            errorMessage = "Failed to connect to server. This chatbot may take 3-4 minutes to respond initially. Please try again.";
-          }
-          
-          const botResponse = {
-            role: 'assistant',
-            content: errorMessage
-          };
-          setMessages(prev => [...prev, botResponse]);
+          let errorMessage =
+            'Failed to connect after retries. RAG cold start may take 3–4 minutes—please try again.';
+          if (err.message) errorMessage = err.message;
+          setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
           setIsLoading(false);
         } else {
-          // Wait before retrying
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+      }
+    }
+  };
+
+  const analyzeJD = async () => {
+    if (!jdText.trim() || jdText.length < 20) {
+      setError('Paste at least 20 characters of a job description.');
+      return;
+    }
+    setIsLoading(true);
+    setError('');
+    setJdResult(null);
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await fetch('/api/jd-match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jdText }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Analysis failed');
+        setJdResult(data);
+        setIsLoading(false);
+        return;
+      } catch (err) {
+        if (attempt === 2) {
+          setError(err.message || 'Failed to analyze JD.');
+          setIsLoading(false);
+        } else {
+          await new Promise((r) => setTimeout(r, 1000));
         }
       }
     }
@@ -94,134 +108,172 @@ export default function Chatbot() {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      if (mode === 'chat') handleSend();
     }
   };
 
-  return (
-    <>
-      {/* Enhanced Floating Chat Button */}
-      {!isOpen && (
-        <button
+  const openFullJD = () => {
+    setIsOpen(false);
+    document.getElementById('jd-match')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <AnimatePresence mode="wait">
+      {!isOpen ? (
+        <motion.button
+          key="chatbot-fab"
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          transition={springOverlay}
           onClick={() => setIsOpen(true)}
-          className="group fixed bottom-6 right-6 z-50 focus:outline-none"
-          aria-label="Open chatbot"
+          className="group fixed bottom-6 right-6 z-50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          aria-label="Open AI assistant"
         >
-          {/* Pulse ring animation */}
-          <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-20"></div>
-          
-          {/* Main button */}
-          <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-110 animate-pulse-glow">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"></div>
-            <svg className="relative w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="absolute inset-0 animate-ping rounded-full bg-accent opacity-20" />
+          <div className="animate-pulse-glow relative rounded-full bg-gradient-primary p-4 shadow-glow transition hover:scale-110">
+            <svg className="relative h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </div>
-          
-          {/* Notification badge */}
-          <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-4 border-white flex items-center justify-center animate-bounce">
-            <span className="text-white text-xs font-bold">!</span>
+          <div className="absolute -right-1 -top-1 flex h-6 w-6 animate-bounce items-center justify-center rounded-full border-4 border-surface-elevated bg-accent-bright">
+            <span className="text-xs font-bold text-white">!</span>
           </div>
-          
-          {/* Tooltip */}
-          <div className="absolute bottom-full right-0 mb-4 px-4 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            <span className="font-semibold">Ask me anything! 🤖</span>
-            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-          </div>
-        </button>
-      )}
-
-      {/* Enhanced Chatbot Window */}
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden animate-slide-up">
-          {/* Enhanced Header */}
-          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white p-5 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
+        </motion.button>
+      ) : (
+        <motion.div
+          key="chatbot-panel"
+          initial={{ opacity: 0, scale: 0.92, y: 24 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.92, y: 24 }}
+          transition={springOverlay}
+          className="fixed bottom-6 right-6 z-50 flex h-[min(600px,calc(100vh-3rem))] w-[min(24rem,calc(100vw-3rem))] flex-col"
+        >
+          <div className="glass glass-glow relative flex h-full flex-col overflow-hidden rounded-2xl">
+            <div className="flex items-center justify-between bg-gradient-primary p-4 text-white">
               <div>
-                <h3 className="font-bold text-lg flex items-center gap-2">
-                  Ask Me Anything
-                  <span className="text-xl">🤖</span>
-                </h3>
-                <p className="text-xs text-blue-100 flex items-center gap-1">
-                  <span className="inline-block w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                  May take 3-4 minutes initially
-                </p>
+                <h3 className="font-display text-lg font-bold">AI Assistant</h3>
+                <p className="text-xs text-white/70">Chat · JD Fit matcher</p>
               </div>
-            </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-all duration-200 hover:rotate-90"
-              aria-label="Close chatbot"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="rounded-lg p-2 transition hover:bg-white/20"
+                aria-label="Close"
               >
-                <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex border-b border-line-subtle">
+              <button
+                type="button"
+                onClick={() => setMode('chat')}
+                className={`flex-1 py-2 text-sm font-semibold transition ${mode === 'chat' ? 'border-b-2 border-accent text-accent-bright' : 'text-ink-muted hover:text-ink-secondary'}`}
+              >
+                Chat
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('jd')}
+                className={`flex-1 py-2 text-sm font-semibold transition ${mode === 'jd' ? 'border-b-2 border-accent text-accent-bright' : 'text-ink-muted hover:text-ink-secondary'}`}
+              >
+                JD Fit
+              </button>
+            </div>
+
+            {mode === 'chat' ? (
+              <>
+                <div className="flex-1 space-y-4 overflow-y-auto bg-surface/40 p-4">
+                  {messages.map((message, index) => (
+                    <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 text-sm ${
+                          message.role === 'user'
+                            ? 'bg-accent text-white shadow-glow-sm'
+                            : 'border border-line-subtle bg-surface-raised text-ink-primary'
+                        }`}
+                      >
+                        {message.content}
+                      </div>
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="rounded-lg border border-line-subtle bg-surface-raised p-3">
+                        <div className="flex space-x-2">
+                          <div className="h-2 w-2 animate-bounce rounded-full bg-accent/60" />
+                          <div className="h-2 w-2 animate-bounce rounded-full bg-accent/60" style={{ animationDelay: '0.2s' }} />
+                          <div className="h-2 w-2 animate-bounce rounded-full bg-accent/60" style={{ animationDelay: '0.4s' }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-lg p-3">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                <div className="border-t border-line-subtle bg-surface/60 p-4">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Ask about skills, projects…"
+                      className="flex-1 rounded-xl border border-line-subtle bg-surface px-4 py-2 text-ink-primary placeholder:text-ink-muted focus:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent/20"
+                      disabled={isLoading}
+                    />
+                    <button
+                      onClick={handleSend}
+                      disabled={isLoading || !input.trim()}
+                      className="btn-primary rounded-xl px-4 py-2 disabled:opacity-50"
+                    >
+                      Send
+                    </button>
                   </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-1 flex-col overflow-y-auto bg-surface/40 p-4">
+                <textarea
+                  value={jdText}
+                  onChange={(e) => setJdText(e.target.value)}
+                  placeholder="Paste job description…"
+                  rows={8}
+                  className="w-full flex-1 resize-none rounded-xl border border-line-subtle bg-surface p-3 text-sm text-ink-primary placeholder:text-ink-muted focus:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  disabled={isLoading}
+                />
+                {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+                {jdResult && (
+                  <div className="glass mt-3 rounded-xl p-3 text-sm">
+                    <p className="font-bold text-accent-bright">{jdResult.matchScore}% fit</p>
+                    <p className="mt-1 text-ink-secondary">{jdResult.pitch}</p>
+                  </div>
+                )}
+                <div className="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={analyzeJD}
+                    disabled={isLoading}
+                    className="btn-primary flex-1 rounded-xl py-2 text-sm font-semibold disabled:opacity-50"
+                  >
+                    {isLoading ? 'Analyzing…' : 'Analyze Fit'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openFullJD}
+                    className="rounded-xl border border-line-subtle px-3 py-2 text-xs text-ink-secondary transition hover:border-line-hover hover:text-ink-primary"
+                  >
+                    Full view
+                  </button>
                 </div>
               </div>
             )}
           </div>
-
-          {/* Enhanced Input */}
-          <div className="border-t border-gray-200 p-4 bg-gradient-to-t from-gray-50 to-white">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your question..."
-                className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading}
-              />
-              <button
-                onClick={handleSend}
-                disabled={isLoading || !input.trim()}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:hover:scale-100"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       )}
-    </>
+    </AnimatePresence>,
+    document.body
   );
 }
-
-

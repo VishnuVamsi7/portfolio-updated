@@ -1,0 +1,41 @@
+export const siteConfig = {
+  name: 'Sai Vishnu Vamsi Senagasetty',
+  shortName: 'Sai Vishnu Vamsi',
+  title: 'Sai Vishnu Vamsi Senagasetty | AI & Machine Learning Engineer',
+  description:
+    'AI Engineer and Machine Learning Engineer specializing in RAG systems, LLM deployment, model serving, and end-to-end ML pipelines. MS Computer Science graduate building production AI products.',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://portfolio-updated.vercel.app',
+  jobTitle: 'AI Engineer / Machine Learning Engineer',
+  location: 'Houston, Texas',
+  email: 'saivishnuvamsis07@gmail.com',
+  phone: '+1 346 901 8158',
+  linkedin: 'https://www.linkedin.com/in/vishnu-senagasetty/',
+  github: 'https://github.com/VishnuVamsi7',
+  ogImage: '/og-image.png',
+  keywords: [
+    'AI Engineer',
+    'Machine Learning Engineer',
+    'RAG',
+    'LLM',
+    'TensorFlow',
+    'PyTorch',
+    'Groq',
+    'Model Deployment',
+    'Data Science',
+    'NLP',
+    'Computer Vision',
+    'Houston',
+  ],
+};
+
+export const sectionAnchors = [
+  { id: 'about', label: 'About' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'jd-match', label: 'JD Match' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'training', label: 'Training' },
+  { id: 'badges', label: 'Badges' },
+  { id: 'achievements', label: 'Achievements' },
+  { id: 'contact', label: 'Contact' },
+];

@@ -1,0 +1,74 @@
+# Sai Vishnu Vamsi Senagasetty — Portfolio
+
+> AI Engineer / Machine Learning Engineer specializing in RAG systems, LLM deployment, model serving, NLP, and production ML pipelines.
+
+## About
+
+- **Name:** Sai Vishnu Vamsi Senagasetty
+- **Title:** AI Engineer, Machine Learning Engineer, Data Science Engineer
+- **Location:** Houston, Texas
+- **Education:** MS Computer Science, University of Houston (2023–2025); BTech CS, SRM University AP (2019–2023)
+- **Email:** saivishnuvamsis07@gmail.com
+- **LinkedIn:** https://www.linkedin.com/in/vishnu-senagasetty/
+- **GitHub:** https://github.com/VishnuVamsi7
+
+## Core Skills
+
+Python, TensorFlow, PyTorch, RAG, LLM Integration, Groq API, LangChain, NLP, Computer Vision, YOLOv5, Whisper, Scikit-learn, Docker, Kubernetes, Azure ML, Apache Airflow, Spark, Model Deployment, Prompt Engineering, Next.js, FastAPI
+
+## Projects
+
+### AI-Powered Portfolio Personal Assistant (Groq + Custom RAG)
+Custom RAG chatbot integrated into this portfolio. Uses Groq for fast inference, conversational memory, and Render deployment—no heavy FAISS dependency.
+- Tags: AI
+- Stack: Groq, RAG, FastAPI, Render, Python, Next.js
+
+### Comparative Analysis of TensorFlow Serving and TorchServe on Azure
+Benchmarked CNN and RNN model serving on Azure ML under light, medium, and heavy load. Compared latency, throughput, and reliability.
+- Tags: AI, ML
+- Stack: TensorFlow Serving, TorchServe, Azure ML, Python
+
+### Energy Provider Churn Analysis
+Random Forest churn model at 90% accuracy; identified tenure, usage, and pricing as top predictors.
+- GitHub: https://github.com/VishnuVamsi7/Energy-Provider-Churn-Analysis
+
+### ImageCraft – Text-to-Image
+Custom UNet + transformer attention with Stable Diffusion fine-tuning for Text2Image synthesis.
+- GitHub: https://github.com/VishnuVamsi7/IMageCraft-Text-to-Image-using-Transformers
+
+### Video Keyword Extraction
+MoviePy + Whisper pipeline for educational video transcription and keyword groundwork.
+- GitHub: https://github.com/VishnuVamsi7/video_keyword_extraction
+
+### Pink Slime Journalism Analysis
+NLP clustering over 27,000+ articles to distinguish misleading journalism from legitimate news.
+- GitHub: https://github.com/VishnuVamsi7/Pink-slime
+
+### Utility Performance Analysis
+Oil & gas utility benchmarking; forecasting models with R² up to 0.99 for Texas revenue.
+- GitHub: https://github.com/VishnuVamsi7/Data-Driven-Analysis-of-Utility-Performance-in-the-Oil-and-Gas-Sector
+
+### Night Objects Detection
+YOLOv5 low-light object detection for pedestrians, vehicles, and infrastructure.
+- GitHub: https://github.com/VishnuVamsi7/Night-Objects---Detection-Using-TensorFlow
+
+## Experience Highlights
+
+- **Software Engineering Fellow** — Develop for Good / Rasdo NGO (2025–Present): Figma-to-production website, Flutterwave API donations
+- **ML Engineer** — AI/ML Research Intern (2025–Present): voice-to-ride ML pipeline, Flutter app performance
+- **Instructional Assistant** — University of Houston (2024–Present): AI-assisted web content workflows
+- **NLP Research Assistant** — University of Houston (2024)
+
+## Live Features on This Site
+
+- **RAG Chatbot:** POST https://chatbot-rag-mun6.onrender.com/receive — ask about background, projects, skills
+- **JD Matcher:** Paste a job description to get fit score, pitch, and matched projects
+- **3D Project Library:** Interactive book carousel for all 8 projects
+
+## Contact
+
+Email: saivishnuvamsis07@gmail.com | Phone: +1 346 901 8158 | Houston, TX
+
+## Canonical URL
+
+https://portfolio-updated.vercel.app
