@@ -67,6 +67,18 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
+        <link
+          rel="preload"
+          as="image"
+          href="/assets/silhouette-transparent.webp?v=3"
+          type="image/webp"
+        />
+        {/* Cover the page before React hydrates so the hero never flashes first */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(sessionStorage.getItem('introPlayed')==='true')return;if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.classList.add('intro-pending');}catch(e){}})();`,
+          }}
+        />
         {jsonLd.map((schema, i) => (
           <script
             key={i}
@@ -76,6 +88,11 @@ export default function RootLayout({ children }) {
         ))}
       </head>
       <body className="min-h-screen flex flex-col">
+        <div
+          id="intro-boot-scrim"
+          className="intro-boot-scrim"
+          aria-hidden="true"
+        />
         <Providers>
           <Navbar />
           <main className="flex-grow">{children}</main>

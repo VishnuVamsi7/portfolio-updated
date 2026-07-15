@@ -8,6 +8,28 @@
     background-color: #0a0b0e;
   }
 
+  /* Pre-hydration intro cover — only shown when html.intro-pending is set */
+  .intro-boot-scrim {
+    display: none;
+  }
+
+  html.intro-pending {
+    overflow: hidden;
+  }
+
+  html.intro-pending .intro-boot-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background-color: #0a0b0e;
+  }
+
+  html.intro-pending nav,
+  html.intro-pending footer {
+    visibility: hidden;
+  }
+
   body {
     @apply min-h-screen font-body text-ink-primary antialiased;
     background-color: transparent;

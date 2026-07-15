@@ -30,7 +30,7 @@ export default function Hero() {
         <div className="relative z-10 container mx-auto px-4 py-16 text-center">
           <StaggerReveal>
             <StaggerItem>
-              <span className="section-label">AI Engineer · Machine Learning Engineer</span>
+              <span className="section-label">AI Developer · Zibtek · RAG &amp; LLM Systems</span>
             </StaggerItem>
             <StaggerItem>
               <CompanionAnchor id="hero" className="mx-auto mb-2" />
@@ -41,9 +41,11 @@ export default function Hero() {
             </StaggerItem>
             <StaggerItem>
               <p className="mx-auto mb-12 max-w-4xl text-xl leading-relaxed text-ink-secondary md:text-2xl">
-                AI Engineer and Machine Learning Engineer specializing in{' '}
-                <span className="font-semibold text-accent-bright">RAG systems, LLM deployment, and production ML pipelines</span>
-                {' '}— built to ship, not just demo.
+                AI Developer shipping{' '}
+                <span className="font-semibold text-accent-bright">
+                  production RAG chatbots, retrieval pipelines, and LLM products
+                </span>
+                {' '}— from existing prototypes to client-ready systems, fast.
               </p>
             </StaggerItem>
             <StaggerItem>

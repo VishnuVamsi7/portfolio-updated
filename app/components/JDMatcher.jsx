@@ -134,11 +134,10 @@ export default function JDMatcher({ onOpenProject }) {
 
         <div className="glass mx-auto mb-8 max-w-3xl rounded-2xl p-4 text-sm text-ink-secondary">
           <p>
-            <strong className="text-ink-primary">Sai Vishnu Vamsi Senagasetty</strong> is an AI Engineer and Machine Learning Engineer
-            with production experience in RAG, LLM deployment (Groq), TensorFlow/PyTorch, NLP, computer
-            vision, Azure ML model serving, and end-to-end ML pipelines. Top projects: Portfolio RAG
-            Assistant, TensorFlow vs TorchServe benchmark, Pink Slime NLP (27k+ articles), ImageCraft
-            Text-to-Image, and Energy Churn ML (90% accuracy).
+            <strong className="text-ink-primary">Sai Vishnu Vamsi Senagasetty</strong> is an AI Developer at Zibtek
+            shipping confidential production RAG chatbots and LLM backends (Python/FastAPI, FAISS, React/Next/NestJS)
+            with STAR-framed measurable gains—e.g. ~45% fewer ungrounded answers and ~40–50% faster delivery cycles.
+            Personal builds include TwinMind, AlphaBot, ResumeLLM, AutoDoc-AI, and e-commerce RAG, plus NLP/CV research.
           </p>
         </div>
 

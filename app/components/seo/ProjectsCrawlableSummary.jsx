@@ -20,6 +20,31 @@ export default function ProjectsCrawlableSummary() {
           <p>
             <strong>Goal:</strong> {project.goal}
           </p>
+          {project.approach && (
+            <p>
+              <strong>Approach:</strong> {project.approach}
+            </p>
+          )}
+          {project.whyApproach && (
+            <p>
+              <strong>Why this approach:</strong> {project.whyApproach}
+            </p>
+          )}
+          {project.howBuilt && (
+            <p>
+              <strong>How it was built:</strong> {project.howBuilt}
+            </p>
+          )}
+          {project.pipeline?.length > 0 && (
+            <div>
+              <strong>Pipeline:</strong>
+              <ol>
+                {project.pipeline.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            </div>
+          )}
           <p>
             <strong>Outcome:</strong> {project.outcome}
           </p>

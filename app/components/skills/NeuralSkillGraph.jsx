@@ -23,11 +23,11 @@ import {
   getCluster,
   getIlluminatedSet,
   getSignature,
+  getConstellationLayout,
 } from '../../lib/skillNetworkData';
 
-const GRAPH_HEIGHT = 580;
+const GRAPH_HEIGHT = 720;
 const SPRING = { type: 'spring', stiffness: 90, damping: 12 };
-const CENTER_PULL = 0.32;
 
 function useContainerSize(ref) {
   const [size, setSize] = useState({ width: 0, height: GRAPH_HEIGHT });
@@ -79,12 +79,85 @@ function SkillTooltip({ label, x, y, width }) {
   );
 }
 
+/** Zodiac stick-figure scaffold + field stars (lit edges drawn live in parent). */
+function ConstellationGuide({ layout }) {
+  const { constellation, starPoints, center } = layout;
+  const fieldStars = useMemo(() => {
+    const stars = [];
+    for (let i = 0; i < 48; i += 1) {
+      const seed = (i * 97 + constellation.name.length * 13) % 1000;
+      stars.push({
+        x: ((seed * 37) % 1000) / 1000,
+        y: ((seed * 53) % 1000) / 1000,
+        r: 0.6 + (seed % 7) * 0.15,
+        o: 0.15 + (seed % 5) * 0.08,
+      });
+    }
+    return stars;
+  }, [constellation.name]);
+
+  return (
+    <g>
+      <rect x="0" y="0" width="100%" height="100%" fill="url(#night-sky)" opacity="0.55" />
+      {fieldStars.map((s, i) => (
+        <circle
+          key={`field-${i}`}
+          cx={`${s.x * 100}%`}
+          cy={`${s.y * 100}%`}
+          r={s.r}
+          fill="#E2E8F0"
+          opacity={s.o}
+        />
+      ))}
+      {constellation.edges.map(([i, j], idx) => {
+        const a = starPoints[i];
+        const b = starPoints[j];
+        return (
+          <line
+            key={`scaffold-${idx}`}
+            x1={a.x}
+            y1={a.y}
+            x2={b.x}
+            y2={b.y}
+            stroke="#94A3B8"
+            strokeWidth="1"
+            strokeOpacity="0.22"
+            strokeDasharray="3 7"
+          />
+        );
+      })}
+      {starPoints.map((p, i) => (
+        <circle
+          key={`scaffold-star-${i}`}
+          cx={p.x}
+          cy={p.y}
+          r={i === constellation.hub ? 3.2 : 2}
+          fill={i === constellation.hub ? '#F8FAFC' : '#CBD5E1'}
+          opacity={i === constellation.hub ? 0.55 : 0.28}
+        />
+      ))}
+      <text
+        x={center.x}
+        y={28}
+        textAnchor="middle"
+        fill="#E2E8F0"
+        style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, letterSpacing: '0.18em' }}
+        opacity="0.85"
+      >
+        {constellation.symbol} {constellation.name.toUpperCase()} · ZODIAC ALIGNMENT
+      </text>
+    </g>
+  );
+}
+
 function SkillNode({
   node,
   position,
   illuminated,
   isDirectMatch,
   hasSearch,
+  isStarHub,
+  isStarRay,
   cluster,
   isHovered,
   isLinkedToHover,
@@ -98,7 +171,7 @@ function SkillNode({
   const offsetY = useMotionValue(0);
   const springX = useSpring(offsetX, SPRING);
   const springY = useSpring(offsetY, SPRING);
-  const scale = isHovered ? 1.12 : isLinkedToHover ? 1.05 : 1;
+  const scale = isStarHub ? 1.18 : isHovered ? 1.12 : isLinkedToHover || isStarRay ? 1.05 : 1;
 
   return (
     <motion.button
@@ -127,22 +200,36 @@ function SkillNode({
         top: position.y,
         x: springX,
         y: springY,
-        borderColor: isHovered || isLinkedToHover ? cluster.color : `${cluster.color}66`,
-        backgroundColor: 'rgba(20, 22, 27, 0.88)',
+        borderColor:
+          isStarHub || isHovered || isLinkedToHover
+            ? cluster.color
+            : isStarRay
+              ? `${cluster.color}aa`
+              : `${cluster.color}66`,
+        backgroundColor: isStarHub ? 'rgba(30, 27, 55, 0.95)' : 'rgba(20, 22, 27, 0.88)',
         color: illuminated ? '#F4F4F6' : '#6B7280',
-        boxShadow: isHovered
-          ? `0 0 24px ${cluster.glow}, 0 0 48px ${cluster.glow}`
-          : isDirectMatch && hasSearch
-            ? `0 0 16px ${cluster.glow}`
-            : '0 4px 16px rgba(0,0,0,0.35)',
+        boxShadow: isStarHub
+          ? `0 0 28px ${cluster.glow}, 0 0 56px rgba(248,250,252,0.25)`
+          : isHovered
+            ? `0 0 24px ${cluster.glow}, 0 0 48px ${cluster.glow}`
+            : isDirectMatch && hasSearch
+              ? `0 0 16px ${cluster.glow}`
+              : isStarRay
+                ? `0 0 14px ${cluster.glow}`
+                : '0 4px 16px rgba(0,0,0,0.35)',
         willChange: 'transform, opacity',
       }}
       animate={{
         scale,
-        opacity: illuminated ? 1 : 0.15,
+        opacity: illuminated ? 1 : hasSearch ? 0.06 : 0.15,
       }}
       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
     >
+      {isStarHub && (
+        <span className="mr-1 inline-block align-middle text-[10px] text-sky-200" aria-hidden="true">
+          ✦
+        </span>
+      )}
       <span
         className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle"
         style={{ backgroundColor: cluster.color }}
@@ -175,6 +262,11 @@ export default function NeuralSkillGraph() {
     [deferredQuery]
   );
 
+  const starLayout = useMemo(
+    () => (width > 0 ? getConstellationLayout(deferredQuery, width, height) : null),
+    [deferredQuery, width, height]
+  );
+
   const matchKey = useMemo(
     () =>
       SKILL_NODES.filter((n) => fuzzyMatchLabel(n.label, deferredQuery))
@@ -199,23 +291,35 @@ export default function NeuralSkillGraph() {
     SKILL_NODES.forEach((node) => {
       if (!simRef.current[node.id]) {
         simRef.current[node.id] = { ...anchors[node.id], vx: 0, vy: 0 };
-      } else {
+      } else if (!hasSearch) {
+        // Snap back toward cluster anchors when clearing search
         simRef.current[node.id].x = anchors[node.id].x;
         simRef.current[node.id].y = anchors[node.id].y;
       }
     });
-  }, [anchors, width]);
+  }, [anchors, width, hasSearch]);
 
-  // Gentle force simulation + search gravity (RAF, transform-only)
+  // Force simulation — cluster layout idle; ★ star layout while searching
   useEffect(() => {
-    if (!width || reduceMotion) return undefined;
+    if (!width || reduceMotion) {
+      if (reduceMotion && starLayout) {
+        SKILL_NODES.forEach((node) => {
+          const target = starLayout.targets.get(node.id);
+          if (target && simRef.current[node.id]) {
+            simRef.current[node.id].x = target.x;
+            simRef.current[node.id].y = target.y;
+          }
+        });
+        setTick((n) => n + 1);
+      }
+      return undefined;
+    }
 
     let raf;
     let t0 = performance.now();
 
     const step = (now) => {
       const t = (now - t0) / 1000;
-      const pull = hasSearch ? CENTER_PULL : 0;
 
       SKILL_NODES.forEach((node) => {
         if (draggingId.current === node.id) return;
@@ -226,17 +330,26 @@ export default function NeuralSkillGraph() {
 
         let targetX = anchor.x;
         let targetY = anchor.y;
+        let wobble = 2.2;
 
-        if (hasSearch && directMatches.has(node.id)) {
-          targetX = anchor.x * (1 - pull) + centerX * pull;
-          targetY = anchor.y * (1 - pull) + centerY * pull;
+        if (starLayout) {
+          const starTarget = starLayout.targets.get(node.id);
+          if (starTarget) {
+            targetX = starTarget.x;
+            targetY = starTarget.y;
+            // Hubs stay steady; rays pulse gently so the star feels alive
+            wobble = starTarget.role === 'hub' ? 0.4 : starTarget.role === 'ray' ? 1.6 : 0.8;
+          }
         }
 
-        const dx = targetX - sim.x + Math.sin(t * 0.9 + node.phase) * 2.2;
-        const dy = targetY - sim.y + Math.cos(t * 0.75 + node.phase) * 1.8;
+        const dx = targetX - sim.x + Math.sin(t * 0.9 + node.phase) * wobble;
+        const dy = targetY - sim.y + Math.cos(t * 0.75 + node.phase) * (wobble * 0.8);
 
-        sim.vx = (sim.vx + dx * 0.042) * 0.86;
-        sim.vy = (sim.vy + dy * 0.042) * 0.86;
+        // Stronger spring into star formation so it resolves quickly
+        const stiffness = starLayout ? 0.085 : 0.042;
+        const damp = starLayout ? 0.8 : 0.86;
+        sim.vx = (sim.vx + dx * stiffness) * damp;
+        sim.vy = (sim.vy + dy * stiffness) * damp;
         sim.x += sim.vx;
         sim.y += sim.vy;
       });
@@ -247,7 +360,7 @@ export default function NeuralSkillGraph() {
 
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [width, height, anchors, hasSearch, matchKey, centerX, centerY, reduceMotion]);
+  }, [width, height, anchors, hasSearch, matchKey, centerX, centerY, reduceMotion, starLayout]);
 
   const getDisplayPosition = useCallback(
     (nodeId) => {
@@ -316,13 +429,15 @@ export default function NeuralSkillGraph() {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search technology stack..."
+          placeholder="Search a skill to see its zodiac constellation alignment..."
           aria-label="Search technology stack"
           className="w-full rounded-xl border border-line-subtle bg-surface/60 py-3.5 pl-10 pr-4 font-mono text-sm text-ink-primary shadow-glass backdrop-blur-md transition-colors duration-200 placeholder:text-ink-muted focus:border-accent/50 focus:outline-none focus:ring-2 focus:ring-accent/30"
         />
         {hasSearch && (
           <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-[10px] uppercase tracking-wider text-accent-bright">
-            {directMatches.size} match{directMatches.size !== 1 ? 'es' : ''}
+            {starLayout
+              ? `${starLayout.constellation.symbol} ${starLayout.constellation.name}`
+              : `${directMatches.size} match${directMatches.size !== 1 ? 'es' : ''}`}
           </span>
         )}
       </div>
@@ -334,8 +449,9 @@ export default function NeuralSkillGraph() {
         style={{ height: GRAPH_HEIGHT }}
         aria-label="Interactive neural skill network graph"
       >
-        {/* Cluster zone labels */}
+        {/* Cluster zone labels — hide while star search is active */}
         {width > 0 &&
+          !starLayout &&
           SKILL_CLUSTERS.map((c) => (
             <span
               key={c.id}
@@ -351,7 +467,7 @@ export default function NeuralSkillGraph() {
             </span>
           ))}
 
-        {/* SVG edges */}
+        {/* SVG edges + search ★ star guide */}
         {width > 0 && (
           <svg
             className="pointer-events-none absolute inset-0 h-full w-full"
@@ -365,7 +481,39 @@ export default function NeuralSkillGraph() {
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+              <linearGradient id="star-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.9" />
+                <stop offset="50%" stopColor="#7DD3FC" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#F472B6" stopOpacity="0.8" />
+              </linearGradient>
+              <radialGradient id="night-sky" cx="50%" cy="45%" r="65%">
+                <stop offset="0%" stopColor="#1e1b4b" stopOpacity="0.35" />
+                <stop offset="55%" stopColor="#0f172a" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#020617" stopOpacity="0.7" />
+              </radialGradient>
             </defs>
+
+            {starLayout && <ConstellationGuide layout={starLayout} />}
+
+            {/* Zodiac figure lines follow live node positions */}
+            {starLayout?.figureEdges?.map(([a, b]) => {
+              const pa = getDisplayPosition(a);
+              const pb = getDisplayPosition(b);
+              return (
+                <line
+                  key={`zodiac-${a}-${b}`}
+                  x1={pa.x}
+                  y1={pa.y}
+                  x2={pb.x}
+                  y2={pb.y}
+                  stroke="url(#star-stroke)"
+                  strokeWidth="2"
+                  strokeOpacity="0.9"
+                  filter="url(#edge-glow)"
+                />
+              );
+            })}
+
             {SKILL_EDGES.map(([a, b]) => {
               const pa = getDisplayPosition(a);
               const pb = getDisplayPosition(b);
@@ -373,10 +521,17 @@ export default function NeuralSkillGraph() {
               const lit = illuminatedEdges.has(edgeKey);
               const hoverLit =
                 hoveredId && (a === hoveredId || b === hoveredId || linkedToHover.has(a) || linkedToHover.has(b));
+              const constellationLink =
+                starLayout &&
+                illuminatedEdges.has(edgeKey) &&
+                (starLayout.hubs.includes(a) ||
+                  starLayout.hubs.includes(b) ||
+                  starLayout.neighbors.includes(a) ||
+                  starLayout.neighbors.includes(b));
               const cluster = getCluster(
                 SKILL_NODES.find((n) => n.id === a)?.clusterId ?? 'core'
               );
-              const opacity = hoverLit ? 0.85 : lit ? 0.45 : 0.06;
+              const opacity = hoverLit ? 0.9 : constellationLink ? 0.55 : lit ? 0.4 : 0.05;
               return (
                 <line
                   key={edgeKey}
@@ -384,10 +539,10 @@ export default function NeuralSkillGraph() {
                   y1={pa.y}
                   x2={pb.x}
                   y2={pb.y}
-                  stroke={cluster.color}
-                  strokeWidth={hoverLit ? 2 : 1.25}
+                  stroke={constellationLink ? '#BAE6FD' : cluster.color}
+                  strokeWidth={hoverLit || constellationLink ? 1.75 : 1.15}
                   strokeOpacity={opacity}
-                  filter={hoverLit ? 'url(#edge-glow)' : undefined}
+                  filter={hoverLit || constellationLink ? 'url(#edge-glow)' : undefined}
                 />
               );
             })}
@@ -399,6 +554,7 @@ export default function NeuralSkillGraph() {
           SKILL_NODES.map((node) => {
             const cluster = getCluster(node.clusterId);
             const pos = getDisplayPosition(node.id);
+            const role = starLayout?.targets.get(node.id)?.role;
             return (
               <SkillNode
                 key={node.id}
@@ -407,6 +563,8 @@ export default function NeuralSkillGraph() {
                 illuminated={illuminatedNodes.has(node.id)}
                 isDirectMatch={directMatches.has(node.id)}
                 hasSearch={hasSearch}
+                isStarHub={role === 'hub'}
+                isStarRay={role === 'ray'}
                 cluster={cluster}
                 isHovered={hoveredId === node.id}
                 isLinkedToHover={linkedToHover.has(node.id) && hoveredId !== node.id}
@@ -431,7 +589,8 @@ export default function NeuralSkillGraph() {
       </div>
 
       <p className="mt-4 text-center text-sm text-ink-muted">
-        Drag nodes to explore — they snap back to their cluster with spring physics.
+        Search a skill to align it and its connected tech into a zodiac constellation (♈–♓). Clear search to
+        return to the knowledge graph clusters.
       </p>
     </div>
   );

@@ -117,7 +117,7 @@ export default function LiveInferenceBio() {
                 <h3 className="font-display text-2xl font-bold text-ink-primary md:text-3xl">
                   Sai Vishnu Vamsi
                 </h3>
-                <p className="font-medium text-ink-secondary">AI Engineer · ML Engineer</p>
+                <p className="font-medium text-ink-secondary">AI Developer · Zibtek</p>
               </div>
             </div>
             <ModeToggle

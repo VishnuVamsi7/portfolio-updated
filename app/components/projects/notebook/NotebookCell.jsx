@@ -18,13 +18,13 @@ export default function NotebookCell({ project }) {
 
   return (
     <article className="overflow-hidden rounded-lg border border-line-subtle bg-[#12131a]">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line-subtle/80 bg-surface/60 px-4 py-3">
-        <div>
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line-subtle/80 bg-surface/60 px-4 py-3">
+        <div className="min-w-0">
           <h3 className="font-display text-lg font-bold text-ink-primary">{project.title}</h3>
-          <p className="font-mono text-xs text-accent-bright/90">{project.subtitle}</p>
+          <p className="mt-0.5 text-sm text-ink-secondary">{project.subtitle}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {project.techStack.slice(0, 3).map((t) => (
+        <div className="flex max-w-full flex-wrap items-center gap-2">
+          {project.techStack.map((t) => (
             <span
               key={t}
               className="rounded border border-line-subtle px-2 py-0.5 font-mono text-[10px] text-ink-muted"
@@ -46,13 +46,9 @@ export default function NotebookCell({ project }) {
         </div>
       </header>
 
-      <InputCell cellIn={project.cellIn} lines={project.pythonLines} />
+      <InputCell lines={project.pythonLines} />
       <MarkdownCell content={project.markdown} />
-      {GradioComponent ? (
-        <GradioComponent />
-      ) : (
-        <DefaultProjectOutput project={project} />
-      )}
+      {GradioComponent ? <GradioComponent /> : <DefaultProjectOutput project={project} />}
     </article>
   );
 }

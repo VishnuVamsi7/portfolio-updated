@@ -18,12 +18,12 @@ import { springSmooth } from '../../lib/motion';
  */
 const JSON_TOKENS = [
   ['{', 'p'], ['\n', 'p'],
-  ['  ', 'p'], ['"role"', 'k'], [': ', 'p'], ['"AI/ML Engineer"', 's'], [',\n', 'p'],
+  ['  ', 'p'], ['"role"', 'k'], [': ', 'p'], ['"AI Developer · Zibtek"', 's'], [',\n', 'p'],
   ['  ', 'p'], ['"location"', 'k'], [': ', 'p'], ['"Houston, TX"', 's'], [',\n', 'p'],
   ['  ', 'p'], ['"stack"', 'k'], [': ', 'p'], ['[', 'p'],
   ['"RAG"', 's'], [', ', 'p'], ['"Groq"', 's'], [', ', 'p'], ['"TensorFlow"', 's'], [', ', 'p'],
   ['"Docker"', 's'], [', ', 'p'], ['"FastAPI"', 's'], [']', 'p'], [',\n', 'p'],
-  ['  ', 'p'], ['"focus"', 'k'], [': ', 'p'], ['"Autonomous Multi-Agent Systems"', 's'], ['\n', 'p'],
+  ['  ', 'p'], ['"focus"', 'k'], [': ', 'p'], ['"Production RAG Chatbots & LLM APIs"', 's'], ['\n', 'p'],
   ['}', 'p'],
 ];
 
@@ -223,7 +223,7 @@ export default function BioCard() {
                 <h3 className="font-display text-2xl font-bold text-ink-primary md:text-3xl">
                   Sai Vishnu Vamsi
                 </h3>
-                <p className="font-medium text-ink-secondary">AI Engineer · ML Engineer</p>
+                <p className="font-medium text-ink-secondary">AI Developer · Zibtek</p>
               </div>
             </div>
 
@@ -243,12 +243,13 @@ export default function BioCard() {
                   className="space-y-4 leading-relaxed text-ink-secondary"
                 >
                   <p className="text-lg text-ink-primary/90">
-                    Sai Vishnu Vamsi Senagasetty is an AI/ML engineer in Houston, Texas, who builds
-                    production-ready RAG assistants, model-serving pipelines, and full-stack AI products.
+                    Sai Vishnu Vamsi Senagasetty is an AI Developer at Zibtek (Houston, Texas) who turns
+                    early chatbot prototypes into production RAG systems—with retrieval, policy routing,
+                    citations, lead capture, and LLM APIs.
                   </p>
                   <p className="text-lg">
-                    He pairs University of Houston graduate training with hands-on work in Groq LLM
-                    deployment, TensorFlow/PyTorch, NLP, computer vision, Docker/Kubernetes, and Azure ML.
+                    Outside client work he ships fast: TwinMind (Whisper + Groq agent), AlphaBot trading,
+                    ResumeLLM, AutoDoc-AI, e-commerce RAG, Flutter apps, and research in NLP, CV, and model serving.
                   </p>
                 </motion.div>
               ) : (

@@ -21,7 +21,8 @@ export default function Projects() {
           </StaggerItem>
           <StaggerItem>
             <p className="mx-auto max-w-2xl text-lg text-ink-secondary">
-              IDE workspace with Jupyter notebooks — select a file, run cells, and interact with Gradio mocks
+              Deep write-ups for each build — skills used, why the approach fits, and how the system was
+              assembled end to end
             </p>
           </StaggerItem>
           <StaggerItem><div className="section-divider" /></StaggerItem>

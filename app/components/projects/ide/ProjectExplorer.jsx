@@ -4,15 +4,15 @@ import { NOTEBOOK_PROJECTS } from '../../../lib/notebookProjects';
 
 export default function ProjectExplorer({ selectedId, onSelect }) {
   return (
-    <aside className="flex h-full flex-col border-r border-line-subtle bg-[#0f1014]">
+    <aside className="flex flex-col bg-[#0f1014]">
       <div className="border-b border-line-subtle px-3 py-2.5">
         <p className="font-mono text-[10px] font-semibold uppercase tracking-widest text-ink-muted">
-          Explorer
+          Projects
         </p>
       </div>
-      <nav className="flex-1 overflow-y-auto p-2" aria-label="Project notebooks">
+      <nav className="p-2" aria-label="Project list">
         <p className="mb-2 px-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted/80">
-          notebooks/ ({NOTEBOOK_PROJECTS.length})
+          builds ({NOTEBOOK_PROJECTS.length})
         </p>
         <ul className="space-y-0.5">
           {NOTEBOOK_PROJECTS.map((project) => {
@@ -30,15 +30,13 @@ export default function ProjectExplorer({ selectedId, onSelect }) {
                       : 'border border-transparent text-ink-secondary hover:bg-surface/80 hover:text-ink-primary'
                   }`}
                 >
-                  <svg
-                    viewBox="0 0 16 16"
-                    className="h-3.5 w-3.5 shrink-0 opacity-70"
+                  <span
+                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                      active ? 'bg-accent-bright' : 'bg-ink-muted/50'
+                    }`}
                     aria-hidden="true"
-                    fill="currentColor"
-                  >
-                    <path d="M3 2h7l3 3v9H3V2zm7 0v3h3" />
-                  </svg>
-                  <span className="truncate">{project.filename}</span>
+                  />
+                  <span className="truncate">{project.shortTitle}</span>
                 </button>
               </li>
             );

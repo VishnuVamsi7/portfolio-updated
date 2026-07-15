@@ -2,17 +2,17 @@ export const faqItems = [
   {
     question: 'What technologies does Sai Vishnu Vamsi Senagasetty specialize in?',
     answer:
-      'Sai Vishnu Vamsi Senagasetty specializes in Python, TensorFlow, PyTorch, RAG (Retrieval-Augmented Generation), LLM integration, Groq API, model deployment (TensorFlow Serving, TorchServe, Azure ML), NLP, computer vision, and end-to-end ML pipelines with Docker, Kubernetes, and Apache Airflow.',
+      'Sai Vishnu Vamsi Senagasetty specializes in production RAG/LLM systems (FastAPI, FAISS, prompt routing, grounded generation), Python, Next.js/React, NestJS, Groq/Whisper, TensorFlow/PyTorch, NLP, computer vision, and end-to-end ML pipelines with Docker and CI/CD.',
   },
   {
     question: "What is Sai Vishnu Vamsi Senagasetty's strongest project?",
     answer:
-      'The AI-Powered Portfolio Personal Assistant (Groq + Custom RAG) is a flagship project: a production RAG chatbot with conversational memory, ~40–50% faster inference via Groq, and full-stack deployment on Render—demonstrating end-to-end LLM engineering without heavy vector databases.',
+      'At Zibtek, he took a legacy chatbot (Situation/Task) and rebuilt it as a production RAG system with Python/FastAPI, vector retrieval, intent routing, policy validation, React chat UI, and lead scoring (Action)—cutting ungrounded answers by ~45%, lifting relevance by ~35%, and improving lead completion by ~30% (Result).',
   },
   {
     question: 'Is Sai Vishnu Vamsi Senagasetty available for hire?',
     answer:
-      'Yes. Sai Vishnu Vamsi Senagasetty is open to AI Engineer, Machine Learning Engineer, and Data Science roles. Contact via email at saivishnuvamsis07@gmail.com or LinkedIn at linkedin.com/in/vishnu-senagasetty.',
+      'Yes. Sai Vishnu Vamsi Senagasetty is actively seeking full-time AI Developer / AI Engineer roles. Contact via email at saivishnuvamsis07@gmail.com or LinkedIn at linkedin.com/in/vishnu-senagasetty.',
   },
   {
     question: 'What education does Sai Vishnu Vamsi Senagasetty have?',
@@ -23,5 +23,10 @@ export const faqItems = [
     question: 'Where is Sai Vishnu Vamsi Senagasetty located?',
     answer:
       'Sai Vishnu Vamsi Senagasetty is based in Houston, Texas, and is open to remote and hybrid opportunities.',
+  },
+  {
+    question: 'Where does Sai Vishnu Vamsi Senagasetty currently work?',
+    answer:
+      'He is an AI Developer at Zibtek (since April 2026), shipping confidential client chatbots and backends—RAG/LLM APIs, NestJS/Next services, and measurable quality/latency/throughput gains using a STAR delivery approach.',
   },
 ];

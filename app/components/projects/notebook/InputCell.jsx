@@ -2,11 +2,11 @@
 
 import { TOKEN_COLORS } from '../../../lib/notebookProjects';
 
-export default function InputCell({ cellIn, lines }) {
+export default function InputCell({ lines }) {
   return (
     <div className="flex gap-0 border-b border-line-subtle/60">
       <div className="w-16 shrink-0 select-none border-r border-line-subtle/40 bg-surface/40 px-3 py-4 text-right font-mono text-xs text-emerald-400/90">
-        In&nbsp;[{cellIn}]:
+        Skills
       </div>
       <pre className="flex-1 overflow-x-auto px-4 py-4 font-mono text-[13px] leading-relaxed">
         {lines.map((line, li) => (

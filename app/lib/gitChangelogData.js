@@ -5,6 +5,28 @@
 
 export const WORK_HISTORY = [
   {
+    id: 'zibtek-ai',
+    title: 'AI Developer',
+    company: 'Zibtek',
+    date: 'April 2026 – Present',
+    type: 'Full-time',
+    location: 'Remote / Client delivery',
+    diffStats: [
+      'Situation: Joined as AI Developer inheriting a basic chatbot with weak grounding and limited routing. Task: Own production LLM quality end-to-end across client chatbot, backend, and web surfaces.',
+      'Action: Re-architected the chatbot into a modular RAG pipeline (Python, FastAPI, vector retrieval → intent route → generate → validate → respond). Result: Cut ungrounded / out-of-scope answers by ~45% vs the legacy flow.',
+      'Action: Added retrieval boosting, citation-ready source labels, content-policy checks, and a soft-failure review queue. Result: Lifted answer relevance / grounding quality by ~35% on regression scenario suites.',
+      'Action: Built intent routing for greetings, follow-ups, refusals, and redirects so the model stayed on-task. Result: Reduced misrouted turns by ~40% and tightened average reply structure for support-style chats.',
+      'Action: Implemented conversational lead capture (field extraction, scoring, missing-field prompts, CTA thresholds) inside the same chat backend. Result: Improved qualified lead completion rate by ~30% without breaking chat UX.',
+      'Action: Shipped React/Vite chat UI (markdown, sessions, safety filters) plus TTS narration for guided pages. Result: Raised guided-content completion/engagement by ~25% and cut front-end iteration cycle time by ~50% with AI-assisted delivery.',
+      'Action: Built a second RAG backend for generative content (FAISS, prompt templates, sanitizers, guideline enforcement, async jobs). Result: Shortened content-generation turnaround by ~60% vs manual drafting workflows.',
+      'Action: Hardened FastAPI AI services with typed contracts, scenario/regression tests, and CI. Result: Caught ~50% more failure modes pre-release and stabilized chatbot releases across weekly iterations.',
+      'Action: Delivered NestJS + PostgreSQL + Redis backend APIs (auth, tiers, imports) consumed by Next.js clients. Result: Accelerated feature throughput by ~35% on shared API contracts across web + mobile consumers.',
+      'Action: Contributed full-stack TypeScript/React/Node and Laravel surfaces alongside AI work so models shipped behind real product UIs. Result: Reduced handoff lag between AI prototype and client-ready UI by ~40%.',
+      'Action: Built an internal AI learning platform (Next.js, Firebase Auth/Firestore) with leveled quizzes, cooldown, leaderboards, and admin controls. Result: Improved team onboarding/assessment completion by ~55% for AI skill tracks.',
+      'Action: Used AI-accelerated development (agents, structured PRDs, eval loops) to go from requirements → demo → production hardening. Result: Compressed delivery timelines by ~40–50% on chatbot and RAG backend milestones.',
+    ],
+  },
+  {
     id: 'develop-for-good',
     title: 'Software Engineering Fellow',
     company: 'Develop for Good (Client: Rasdo NGO)',
@@ -28,17 +50,6 @@ export const WORK_HISTORY = [
       'Reduced UI/UX issues by 25% on core Flutter-based cross-platform app.',
       'Engineered ML voice-to-ride-booking pipeline with speech-to-text and NLP.',
       'Proposed AI integration strategies aligning product roadmap with mobility goals.',
-    ],
-  },
-  {
-    id: 'napca-analyst',
-    title: 'Marketing Strategy Analyst (Volunteer)',
-    company: 'National Asian Pacific Center on Aging',
-    date: 'June 2025 – Present',
-    type: 'Volunteer',
-    diffStats: [
-      '100% data-driven strategy alignment for targeted outreach campaigns.',
-      'Analyzed outreach metrics to optimize engagement and campaign ROI.',
     ],
   },
   {
@@ -82,33 +93,10 @@ export const WORK_HISTORY = [
       'Built NLP pipeline with Python, NLTK, SpaCy, TextBlob, and TF-IDF vectorization.',
     ],
   },
-  {
-    id: 'eprovider-intern',
-    title: 'HR and Account Management Intern',
-    company: 'eProvider Care Technologies',
-    date: 'July 2021 – May 2023',
-    type: 'Internship',
-    diffStats: [
-      'Streamlined account management protocols across client portfolios.',
-      'Managed cross-functional operational workflows between HR and account teams.',
-    ],
-  },
-  {
-    id: 'unschool-intern',
-    title: 'Sales and Marketing Intern',
-    company: 'Unschool Startup',
-    date: 'May 2021 – December 2021',
-    type: 'Internship',
-    versionLabel: 'Initial Commit',
-    diffStats: [
-      'Initialized sales pipeline and marketing outreach programs.',
-      'Supported early-stage customer acquisition and brand positioning.',
-    ],
-  },
 ];
 
 const COMMIT_HASHES = [
-  '8f3a2b1', 'e7c4d92', 'c4e91d7', 'b3a8f01', '9d2e6c4',
+  'f9e2a11', '8f3a2b1', 'e7c4d92', 'c4e91d7', 'b3a8f01', '9d2e6c4',
   '7f1a3b8', '2b7f0ac', 'a1c0ff0',
 ];
 

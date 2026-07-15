@@ -3,7 +3,7 @@ import { allSkills, skillCategories } from './skills';
 
 export const profile = {
   name: 'Sai Vishnu Vamsi Senagasetty',
-  titles: ['AI Engineer', 'Machine Learning Engineer', 'Data Science Engineer'],
+  titles: ['AI Developer', 'AI Engineer', 'Machine Learning Engineer', 'Full-Stack AI Builder'],
   location: 'Houston, Texas',
   education: [
     {
@@ -18,6 +18,26 @@ export const profile = {
     },
   ],
   experience: [
+    {
+      id: 'zibtek-ai',
+      title: 'AI Developer',
+      company: 'Zibtek',
+      period: 'April 2026 - Present',
+      skills: [
+        'RAG',
+        'LLMs',
+        'FastAPI',
+        'Python',
+        'FAISS',
+        'Prompt Engineering',
+        'Next.js',
+        'NestJS',
+        'React',
+        'Vector Search',
+      ],
+      summary:
+        'AI Developer using STAR delivery on confidential client work: evolved a basic chatbot into FastAPI/RAG with ~45% fewer ungrounded answers, plus NestJS/Next backends and AI-accelerated shipping (~40–50% faster milestones).',
+    },
     {
       id: 'develop-for-good',
       title: 'Software Engineering Fellow',
@@ -35,14 +55,6 @@ export const profile = {
       skills: ['Machine Learning', 'Flutter', 'NLP', 'Speech-to-Text', 'ML Pipelines'],
       summary:
         'Built ML voice-to-ride booking pipeline and accelerated product timelines with automation.',
-    },
-    {
-      id: 'napca-analyst',
-      title: 'Marketing Strategy Analyst (Volunteer)',
-      company: 'National Asian Pacific Center on Aging',
-      period: 'June 2025 - Present',
-      skills: ['Marketing Analytics', 'Strategy', 'Data Analysis'],
-      summary: '100% data-driven campaign strategy and outreach metric optimization.',
     },
     {
       id: 'instructional-assistant',
@@ -69,22 +81,6 @@ export const profile = {
       skills: ['NLP', 'Python', 'Research', 'Text Processing'],
       summary: 'Pink slime misinformation research across 600k+ sentences and 27K labeled dataset.',
     },
-    {
-      id: 'eprovider-intern',
-      title: 'HR and Account Management Intern',
-      company: 'eProvider Care Technologies',
-      period: 'July 2021 - May 2023',
-      skills: ['Account Management', 'HR Operations', 'Workflows'],
-      summary: 'Streamlined account management and cross-functional operational workflows.',
-    },
-    {
-      id: 'unschool-intern',
-      title: 'Sales and Marketing Intern',
-      company: 'Unschool Startup',
-      period: 'May 2021 - December 2021',
-      skills: ['Sales', 'Marketing', 'Outreach'],
-      summary: 'Initialized sales pipeline and marketing outreach programs.',
-    },
   ],
   skills: allSkills,
   skillCategories,
@@ -99,23 +95,25 @@ export const profile = {
     github: p.github,
   })),
   pitch:
-    'Sai Vishnu Vamsi Senagasetty is an AI/ML engineer with hands-on experience in RAG systems, LLM deployment, model serving benchmarks, NLP, computer vision, and production ML pipelines—combining research depth with full-stack delivery.',
+    'Sai Vishnu Vamsi Senagasetty is an AI Developer at Zibtek who ships confidential production RAG chatbots and LLM backends (Python/FastAPI, FAISS, React/Next/Nest)—improving grounding, lead conversion, and delivery speed by tens of percent through STAR-framed, measurable iteration.',
 };
 
 export function getSkillTaxonomy() {
   const aliases = {
-    'machine learning': ['ml', 'machine learning', 'predictive analytics', 'deep learning'],
-    'deep learning': ['deep learning', 'neural network', 'cnn', 'rnn', 'transformer'],
-    python: ['python', 'pytorch', 'tensorflow', 'scikit-learn', 'pandas'],
-    rag: ['rag', 'retrieval', 'llm', 'langchain', 'groq', 'prompt engineering'],
-    nlp: ['nlp', 'natural language', 'text processing', 'whisper', 'sentiment'],
-    'computer vision': ['computer vision', 'yolo', 'opencv', 'image', 'detection'],
-    docker: ['docker', 'kubernetes', 'container', 'k8s'],
-    azure: ['azure', 'azure ml', 'cloud'],
-    sql: ['sql', 'database', 'etl'],
-    javascript: ['javascript', 'react', 'next.js', 'node', 'typescript'],
-    deployment: ['deployment', 'serving', 'mlops', 'ci/cd', 'model deployment'],
-    data: ['data science', 'analytics', 'pandas', 'spark', 'visualization'],
+    'machine learning': ['ml', 'machine learning', 'predictive analytics', 'deep learning', 'scikit-learn', 'mlflow'],
+    'deep learning': ['deep learning', 'neural network', 'cnn', 'rnn', 'transformer', 'pytorch', 'tensorflow', 'unet'],
+    python: ['python', 'pytorch', 'tensorflow', 'scikit-learn', 'pandas', 'fastapi', 'numpy'],
+    rag: ['rag', 'retrieval', 'llm', 'langchain', 'groq', 'prompt engineering', 'faiss', 'vector search', 'onnx'],
+    nlp: ['nlp', 'natural language', 'text processing', 'whisper', 'sentiment', 'tf-idf', 'topic modeling'],
+    'computer vision': ['computer vision', 'yolo', 'yolov5', 'opencv', 'image', 'detection', 'stable diffusion'],
+    docker: ['docker', 'kubernetes', 'container', 'k8s', 'docker compose'],
+    azure: ['azure', 'azure ml', 'cloud', 'render', 'netlify'],
+    sql: ['sql', 'database', 'etl', 'postgresql', 'redis', 'firestore'],
+    javascript: ['javascript', 'react', 'next.js', 'node', 'typescript', 'vite', 'nestjs', 'express'],
+    mobile: ['flutter', 'dart', 'android', 'ios', 'cross-platform'],
+    deployment: ['deployment', 'serving', 'mlops', 'ci/cd', 'model deployment', 'gitlab ci', 'github actions'],
+    data: ['data science', 'analytics', 'pandas', 'spark', 'pyspark', 'visualization', 'airflow', 'eda'],
+    backend: ['fastapi', 'nestjs', 'node.js', 'express', 'rest apis', 'pydantic'],
   };
 
   return { skills: allSkills, aliases };

@@ -2,27 +2,43 @@
 
 import GradioShell from './GradioShell';
 
+/** Compact footer — full narrative lives in the markdown Impact section above. */
 export default function DefaultProjectOutput({ project }) {
   return (
-    <GradioShell label="metrics">
+    <GradioShell label="artifacts">
       <div className="space-y-4 font-body text-sm text-ink-secondary">
         <div>
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">Result summary</p>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+            Impact snapshot
+          </p>
           <p className="leading-relaxed text-ink-primary/90">{project.outcome}</p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+            Skills in this build
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {project.techStack?.map((skill) => (
+              <span
+                key={skill}
+                className="rounded border border-accent/25 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent-bright"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 border-t border-line-subtle pt-3">
           {project.tags?.map((tag) => (
             <span
               key={tag}
-              className="rounded border border-accent/25 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent-bright"
+              className="rounded border border-line-subtle px-2 py-0.5 font-mono text-[10px] text-ink-muted"
             >
               {tag}
             </span>
           ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2 border-t border-line-subtle pt-3">
           {project.github && (
             <a
               href={project.github}
@@ -55,9 +71,6 @@ export default function DefaultProjectOutput({ project }) {
             >
               Presentation ↗
             </a>
-          )}
-          {!project.github && !project.report && !project.presentation && (
-            <span className="font-mono text-xs text-ink-muted">// artifacts available on request</span>
           )}
         </div>
       </div>

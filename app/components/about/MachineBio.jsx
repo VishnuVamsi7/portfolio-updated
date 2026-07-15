@@ -5,12 +5,12 @@ import { motion } from 'framer-motion';
 
 const JSON_TOKENS = [
   ['{', 'p'], ['\n', 'p'],
-  ['  ', 'p'], ['"role"', 'k'], [': ', 'p'], ['"AI/ML Engineer"', 's'], [',\n', 'p'],
+  ['  ', 'p'], ['"role"', 'k'], [': ', 'p'], ['"AI Developer · Zibtek"', 's'], [',\n', 'p'],
   ['  ', 'p'], ['"location"', 'k'], [': ', 'p'], ['"Houston, TX"', 's'], [',\n', 'p'],
   ['  ', 'p'], ['"stack"', 'k'], [': ', 'p'], ['[', 'p'],
   ['"RAG"', 's'], [', ', 'p'], ['"Groq"', 's'], [', ', 'p'], ['"TensorFlow"', 's'], [', ', 'p'],
   ['"Docker"', 's'], [', ', 'p'], ['"FastAPI"', 's'], [']', 'p'], [',\n', 'p'],
-  ['  ', 'p'], ['"focus"', 'k'], [': ', 'p'], ['"Autonomous Multi-Agent Systems"', 's'], ['\n', 'p'],
+  ['  ', 'p'], ['"focus"', 'k'], [': ', 'p'], ['"Production RAG Chatbots & LLM APIs"', 's'], ['\n', 'p'],
   ['}', 'p'],
 ];
 
