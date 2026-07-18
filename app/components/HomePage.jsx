@@ -3,22 +3,20 @@
 import { useCallback, useLayoutEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Hero from './Hero';
-import About from './About';
-import Skills from './Skills';
-import ProjectsSection from './ProjectsSection';
-import JDMatcher from './JDMatcher';
 import LandingIntro from './intro/LandingIntro';
-import { CompanionProvider } from './three/CompanionContext';
-import ScrollTimeline from './effects/ScrollTimeline';
 import ClientErrorBoundary from './ui/ClientErrorBoundary';
+import DeferredSection from './performance/DeferredSection';
 
-const WorkExperience = dynamic(() => import('./WorkExperience'), { ssr: true });
-const Training = dynamic(() => import('./Training'), { ssr: true });
-const Badges = dynamic(() => import('./Badges'), { ssr: true });
-const Achievements = dynamic(() => import('./Achievements'), { ssr: true });
-const Contact = dynamic(() => import('./Contact'), { ssr: true });
+const About = dynamic(() => import('./About'), { ssr: false });
+const Skills = dynamic(() => import('./Skills'), { ssr: false });
+const JDMatcher = dynamic(() => import('./JDMatcher'), { ssr: false });
+const ProjectsSection = dynamic(() => import('./ProjectsSection'), { ssr: false });
+const WorkExperience = dynamic(() => import('./WorkExperience'), { ssr: false });
+const Training = dynamic(() => import('./Training'), { ssr: false });
+const Badges = dynamic(() => import('./Badges'), { ssr: false });
+const Achievements = dynamic(() => import('./Achievements'), { ssr: false });
+const Contact = dynamic(() => import('./Contact'), { ssr: false });
 const Chatbot = dynamic(() => import('./Chatbot'), { ssr: false });
-const CompanionAvatar = dynamic(() => import('./three/CompanionAvatar'), { ssr: false });
 
 function shouldShowIntro() {
   if (typeof window === 'undefined') return false;
@@ -38,6 +36,7 @@ function clearIntroPending() {
 export default function HomePage() {
   // null = still deciding (keep cover). Never paint main hero first.
   const [introActive, setIntroActive] = useState(null);
+  const [introExiting, setIntroExiting] = useState(false);
 
   useLayoutEffect(() => {
     const show = shouldShowIntro();
@@ -54,13 +53,14 @@ export default function HomePage() {
 
   const handleIntroComplete = useCallback(() => {
     clearIntroPending();
+    setIntroExiting(false);
     setIntroActive(false);
   }, []);
 
   const showCover = introActive !== false;
 
   return (
-    <CompanionProvider>
+    <>
       {/* Solid cover until we know intro is skipped, or until LandingIntro paints */}
       {introActive !== true && showCover && (
         <div
@@ -72,7 +72,10 @@ export default function HomePage() {
 
       {introActive === true && (
         <ClientErrorBoundary name="LandingIntro">
-          <LandingIntro onComplete={handleIntroComplete} />
+          <LandingIntro
+            onExitStart={() => setIntroExiting(true)}
+            onComplete={handleIntroComplete}
+          />
         </ClientErrorBoundary>
       )}
 
@@ -80,30 +83,43 @@ export default function HomePage() {
       <div
         className="relative z-10"
         style={{
-          visibility: introActive === null ? 'hidden' : 'visible',
+          visibility: introActive === false || introExiting ? 'visible' : 'hidden',
         }}
         aria-hidden={introActive !== false}
+        inert={introActive !== false ? '' : undefined}
       >
         <Hero />
-        <About />
-        <Skills />
-        <JDMatcher onOpenProject={handleOpenProject} />
-        <ProjectsSection />
-        <WorkExperience />
-        <Training />
-        <Badges />
-        <Achievements />
-        <Contact />
-        <div id="chatbot">
+        <DeferredSection id="about" enabled={introActive === false} minHeight={1450}>
+          <About />
+        </DeferredSection>
+        <DeferredSection id="skills" enabled={introActive === false} minHeight={1450}>
+          <Skills />
+        </DeferredSection>
+        <DeferredSection id="jd-match" enabled={introActive === false} minHeight={900}>
+          <JDMatcher onOpenProject={handleOpenProject} />
+        </DeferredSection>
+        <DeferredSection id="projects" enabled={introActive === false} minHeight={1800}>
+          <ProjectsSection />
+        </DeferredSection>
+        <DeferredSection id="experience" enabled={introActive === false} minHeight={1100}>
+          <WorkExperience />
+        </DeferredSection>
+        <DeferredSection id="training" enabled={introActive === false} minHeight={900}>
+          <Training />
+        </DeferredSection>
+        <DeferredSection id="badges" enabled={introActive === false} minHeight={700}>
+          <Badges />
+        </DeferredSection>
+        <DeferredSection id="achievements" enabled={introActive === false} minHeight={700}>
+          <Achievements />
+        </DeferredSection>
+        <DeferredSection id="contact" enabled={introActive === false} minHeight={700}>
+          <Contact />
+        </DeferredSection>
+        <DeferredSection id="chatbot" enabled={introActive === false} minHeight={600}>
           <Chatbot />
-        </div>
-        <ClientErrorBoundary name="CompanionAvatar">
-          <CompanionAvatar />
-        </ClientErrorBoundary>
-        <ClientErrorBoundary name="ScrollTimeline">
-          <ScrollTimeline />
-        </ClientErrorBoundary>
+        </DeferredSection>
       </div>
-    </CompanionProvider>
+    </>
   );
 }

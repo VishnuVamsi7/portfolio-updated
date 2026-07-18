@@ -10,7 +10,7 @@ module.exports = {
       fontFamily: {
         display: ['var(--font-display)', 'system-ui', 'sans-serif'],
         body: ['var(--font-body)', 'system-ui', 'sans-serif'],
-        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Consolas', 'monospace'],
       },
       colors: {
         base: {
@@ -31,8 +31,8 @@ module.exports = {
         },
         ink: {
           primary: '#F4F4F6',
-          secondary: '#9CA3AF',
-          muted: '#6B7280',
+          secondary: '#C4C8D0',
+          muted: '#A7ADB8',
         },
         line: {
           subtle: 'rgba(255,255,255,0.08)',

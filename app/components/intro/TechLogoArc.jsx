@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
 
 /** Inline brand marks — no external icon CDN. */
 const LOGO_MARKS = {
@@ -94,23 +93,6 @@ export function computeArcPositions(count, radius, startAngle = -160, endAngle =
   });
 }
 
-const containerVariants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.08, delayChildren: 0 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, scale: 0.55, y: 12 },
-  show: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { duration: 0.45, ease: 'easeOut' },
-  },
-};
-
 export default function TechLogoArc({
   logos = INTRO_TECH_STACK,
   radius = 220,
@@ -124,33 +106,30 @@ export default function TechLogoArc({
   );
 
   return (
-    <motion.div
+    <div
       className={`pointer-events-none absolute left-1/2 top-[38%] z-20 -translate-x-1/2 -translate-y-1/2 ${className}`}
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
       aria-hidden="true"
     >
       {logos.map((logo, i) => {
         const pos = positions[i];
         const mark = LOGO_MARKS[logo.label];
         return (
-          <motion.div
+          <div
             key={logo.id}
-            variants={itemVariants}
-            className="absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border border-accent/35 bg-surface/80 text-accent-bright shadow-glow-sm backdrop-blur-sm sm:h-12 sm:w-12 md:h-14 md:w-14"
+            className="intro-tech-logo absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border border-accent/35 bg-surface/80 text-accent-bright shadow-glow-sm backdrop-blur-sm sm:h-12 sm:w-12 md:h-14 md:w-14"
             style={{
               left: pos.x,
               top: pos.y,
+              animationDelay: `${i * 80}ms`,
               filter:
                 'drop-shadow(0 0 6px rgba(139,92,246,0.85)) drop-shadow(0 0 14px rgba(124,58,237,0.55)) drop-shadow(0 0 28px rgba(124,58,237,0.3))',
             }}
             title={logo.label}
           >
             <span className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7">{mark}</span>
-          </motion.div>
+          </div>
         );
       })}
-    </motion.div>
+    </div>
   );
 }

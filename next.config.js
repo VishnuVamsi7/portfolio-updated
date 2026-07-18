@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
+  productionBrowserSourceMaps: true,
+  experimental: {
+    optimizePackageImports: ['framer-motion'],
+  },
 };
 
 module.exports = nextConfig;

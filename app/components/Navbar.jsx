@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { scrollToSection, smoothScrollTo } from '../lib/smoothScroll';
-import { springSmooth } from '../lib/motion';
 
 const navItems = [
   { name: 'About', id: 'about' },
@@ -18,7 +16,6 @@ const navItems = [
 export default function Navbar() {
   const [activeId, setActiveId] = useState('about');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const sections = navItems
@@ -51,7 +48,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => smoothScrollTo(0)}
-            className="font-display text-xl font-bold text-gradient"
+            className="min-h-11 cursor-pointer font-display text-xl font-bold text-gradient"
             data-cursor="pointer"
           >
             Sai Vishnu Vamsi
@@ -63,18 +60,14 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => goTo(item.id)}
-                  className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`relative min-h-11 cursor-pointer rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     activeId === item.id ? 'text-accent-bright' : 'text-ink-secondary hover:text-ink-primary'
                   }`}
                   data-cursor="pointer"
                 >
                   {item.name}
-                  {activeId === item.id && !reduceMotion && (
-                    <motion.span
-                      layoutId="nav-active"
-                      className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-accent shadow-glow-sm"
-                      transition={springSmooth}
-                    />
+                  {activeId === item.id && (
+                    <span className="absolute inset-x-2 -bottom-0.5 h-0.5 rounded-full bg-accent shadow-glow-sm" />
                   )}
                 </button>
               </li>
@@ -83,7 +76,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="rounded-lg p-2 text-ink-secondary hover:text-accent lg:hidden"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-ink-secondary transition-colors duration-200 hover:text-accent lg:hidden"
             aria-label="Toggle menu"
             onClick={() => setMobileOpen((o) => !o)}
           >
@@ -98,23 +91,11 @@ export default function Navbar() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={springSmooth}
-            className="overflow-hidden border-t border-line-subtle lg:hidden"
-          >
+      {mobileOpen && (
+          <div className="overflow-hidden border-t border-line-subtle lg:hidden">
             <ul className="container mx-auto space-y-1 px-4 py-4">
-              {navItems.map((item, i) => (
-                <motion.li
-                  key={item.id}
-                  initial={reduceMotion ? false : { opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05, ...springSmooth }}
-                >
+              {navItems.map((item) => (
+                <li key={item.id}>
                   <button
                     type="button"
                     onClick={() => goTo(item.id)}
@@ -124,12 +105,11 @@ export default function Navbar() {
                   >
                     {item.name}
                   </button>
-                </motion.li>
+                </li>
               ))}
             </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
     </nav>
   );
 }

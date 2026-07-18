@@ -18,11 +18,116 @@
   }
 
   html.intro-pending .intro-boot-scrim {
-    display: block;
+    display: flex;
     position: fixed;
     inset: 0;
     z-index: 300;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     background-color: #0a0b0e;
+  }
+
+  .intro-boot-aura {
+    position: absolute;
+    width: min(76vw, 420px);
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      rgba(124, 58, 237, 0.5) 0%,
+      rgba(139, 92, 246, 0.24) 38%,
+      rgba(167, 139, 250, 0.07) 60%,
+      transparent 72%
+    );
+  }
+
+  .intro-boot-image {
+    position: relative;
+    width: min(78vw, 420px);
+    height: auto;
+    aspect-ratio: 1;
+    filter:
+      drop-shadow(0 0 8px rgba(139, 92, 246, 0.95))
+      drop-shadow(0 0 22px rgba(124, 58, 237, 0.7));
+  }
+
+  .intro-boot-copy {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    top: calc(50% + min(42vw, 220px));
+    z-index: 2;
+    text-align: center;
+  }
+
+  html.intro-pending .intro-boot-scrim.intro-boot-art,
+  .intro-boot-scrim.intro-boot-art {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
+    background: transparent;
+  }
+
+  @keyframes intro-enter {
+    from {
+      opacity: 0;
+      transform: translate(-50%, calc(-50% + 12px)) scale(0.7);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  @keyframes intro-copy-enter {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes intro-arrow-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  .intro-tech-logo {
+    opacity: 0;
+    animation: intro-enter 450ms ease-out forwards;
+  }
+
+  .intro-hint {
+    opacity: 0;
+    animation: intro-copy-enter 450ms ease-out forwards;
+  }
+
+  .intro-hint-arrow {
+    animation: intro-arrow-bounce 1.4s ease-in-out 3;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro-tech-logo,
+    .intro-hint,
+    .intro-hint-arrow {
+      opacity: 1;
+      animation: none;
+      transform: none;
+    }
   }
 
   html.intro-pending nav,
@@ -33,6 +138,12 @@
   body {
     @apply min-h-screen font-body text-ink-primary antialiased;
     background-color: transparent;
+  }
+
+  /* Let the browser skip paint/layout work for off-screen portfolio sections. */
+  main section:not(#hero) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 900px;
   }
 
   body.custom-cursor-active,

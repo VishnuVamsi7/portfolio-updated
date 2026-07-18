@@ -207,7 +207,7 @@ function SkillNode({
               ? `${cluster.color}aa`
               : `${cluster.color}66`,
         backgroundColor: isStarHub ? 'rgba(30, 27, 55, 0.95)' : 'rgba(20, 22, 27, 0.88)',
-        color: illuminated ? '#F4F4F6' : '#6B7280',
+        color: illuminated ? '#F4F4F6' : '#A7ADB8',
         boxShadow: isStarHub
           ? `0 0 28px ${cluster.glow}, 0 0 56px rgba(248,250,252,0.25)`
           : isHovered
@@ -282,8 +282,6 @@ export default function NeuralSkillGraph() {
   );
 
   const hasSearch = deferredQuery.trim().length > 0;
-  const centerX = width / 2;
-  const centerY = height / 2;
 
   // Initialise simulation positions when anchors change
   useEffect(() => {
@@ -299,68 +297,22 @@ export default function NeuralSkillGraph() {
     });
   }, [anchors, width, hasSearch]);
 
-  // Force simulation — cluster layout idle; ★ star layout while searching
+  // Move once per layout/search change. A permanent requestAnimationFrame loop
+  // made this below-the-fold graph consume CPU even when it was not visible.
   useEffect(() => {
-    if (!width || reduceMotion) {
-      if (reduceMotion && starLayout) {
-        SKILL_NODES.forEach((node) => {
-          const target = starLayout.targets.get(node.id);
-          if (target && simRef.current[node.id]) {
-            simRef.current[node.id].x = target.x;
-            simRef.current[node.id].y = target.y;
-          }
-        });
-        setTick((n) => n + 1);
-      }
-      return undefined;
-    }
+    if (!width) return;
 
-    let raf;
-    let t0 = performance.now();
-
-    const step = (now) => {
-      const t = (now - t0) / 1000;
-
-      SKILL_NODES.forEach((node) => {
-        if (draggingId.current === node.id) return;
-
-        const sim = simRef.current[node.id];
-        const anchor = anchors[node.id];
-        if (!sim || !anchor) return;
-
-        let targetX = anchor.x;
-        let targetY = anchor.y;
-        let wobble = 2.2;
-
-        if (starLayout) {
-          const starTarget = starLayout.targets.get(node.id);
-          if (starTarget) {
-            targetX = starTarget.x;
-            targetY = starTarget.y;
-            // Hubs stay steady; rays pulse gently so the star feels alive
-            wobble = starTarget.role === 'hub' ? 0.4 : starTarget.role === 'ray' ? 1.6 : 0.8;
-          }
-        }
-
-        const dx = targetX - sim.x + Math.sin(t * 0.9 + node.phase) * wobble;
-        const dy = targetY - sim.y + Math.cos(t * 0.75 + node.phase) * (wobble * 0.8);
-
-        // Stronger spring into star formation so it resolves quickly
-        const stiffness = starLayout ? 0.085 : 0.042;
-        const damp = starLayout ? 0.8 : 0.86;
-        sim.vx = (sim.vx + dx * stiffness) * damp;
-        sim.vy = (sim.vy + dy * stiffness) * damp;
-        sim.x += sim.vx;
-        sim.y += sim.vy;
-      });
-
-      setTick((n) => (n + 1) % 100000);
-      raf = requestAnimationFrame(step);
-    };
-
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [width, height, anchors, hasSearch, matchKey, centerX, centerY, reduceMotion, starLayout]);
+    SKILL_NODES.forEach((node) => {
+      const sim = simRef.current[node.id];
+      const target = starLayout?.targets.get(node.id) ?? anchors[node.id];
+      if (!sim || !target || draggingId.current === node.id) return;
+      sim.x = target.x;
+      sim.y = target.y;
+      sim.vx = 0;
+      sim.vy = 0;
+    });
+    setTick((n) => (n + 1) % 100000);
+  }, [width, anchors, starLayout]);
 
   const getDisplayPosition = useCallback(
     (nodeId) => {

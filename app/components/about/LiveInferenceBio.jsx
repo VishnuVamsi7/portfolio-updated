@@ -28,7 +28,7 @@ function RobotAvatar({ reduceMotion }) {
           <rect x="10" y="14" width="28" height="22" rx="6" fill="#1A1D24" stroke="#8B5CF6" strokeWidth="1.5" />
           <circle cx="19" cy="24" r="3" fill="#A78BFA" />
           <circle cx="29" cy="24" r="3" fill="#A78BFA" />
-          <path d="M20 31h8" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M20 31h8" stroke="#A7ADB8" strokeWidth="1.5" strokeLinecap="round" />
           <path d="M24 8v6" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" />
           <circle cx="24" cy="6" r="2" fill="#8B5CF6" />
         </svg>

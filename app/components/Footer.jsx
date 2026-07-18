@@ -8,7 +8,7 @@ export default function Footer() {
           <p className="text-ink-secondary">© {new Date().getFullYear()} Sai Vishnu Vamsi Senagasetty</p>
           <p className="mt-2 text-sm text-ink-muted">
             Next.js 14 · Tailwind · Framer Motion ·{' '}
-            <a href="/llms.txt" className="link-underline text-accent hover:text-accent-bright">llms.txt</a>
+            <a href="/llms.txt" className="link-underline text-accent-bright hover:text-ink-primary">llms.txt</a>
           </p>
           <div className="mt-3"><LastUpdated /></div>
         </div>

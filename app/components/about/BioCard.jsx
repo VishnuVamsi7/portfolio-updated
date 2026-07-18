@@ -30,7 +30,7 @@ const JSON_TOKENS = [
 const TOKEN_COLOR = {
   k: '#A78BFA', // accent-bright — keys
   s: '#6EE7B7', // teal — string values
-  p: '#6B7280', // ink-muted — punctuation
+  p: '#A7ADB8', // accessible muted punctuation
 };
 
 const FULL_JSON_LENGTH = JSON_TOKENS.reduce((sum, [text]) => sum + text.length, 0);

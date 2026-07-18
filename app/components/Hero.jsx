@@ -1,45 +1,44 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import dynamic from 'next/dynamic';
-import HeroInkBackground from './effects/HeroInkBackground';
-import CompanionAnchor from './three/CompanionAnchor';
-import MagneticButton from './effects/MagneticButton';
-import { StaggerReveal, StaggerItem } from './effects/SectionReveal';
-
-const HeroScene = dynamic(() => import('./three/HeroScene'), { ssr: false });
-const HeroShaderBackground = dynamic(() => import('./effects/HeroShaderBackground'), { ssr: false });
+import { useState } from 'react';
 
 export default function Hero() {
-  const [showChatPrompt, setShowChatPrompt] = useState(false);
   const [isResumeOpen, setIsResumeOpen] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowChatPrompt(true), 3000);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <>
       <section id="hero" className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-base">
-        <HeroShaderBackground />
-        <HeroInkBackground />
-        <HeroScene />
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden="true"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 34%, rgba(139,92,246,0.18), transparent 38%), radial-gradient(circle at 12% 78%, rgba(124,58,237,0.09), transparent 34%), linear-gradient(180deg, #0A0B0E 0%, #0D0E12 58%, #0A0B0E 100%)',
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-25"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+            maskImage: 'radial-gradient(ellipse 70% 65% at 50% 40%, black, transparent 78%)',
+          }}
+        />
 
         <div className="relative z-10 container mx-auto px-4 py-16 text-center">
-          <StaggerReveal>
-            <StaggerItem>
+          <div>
+            <div>
               <span className="section-label">AI Developer · Zibtek · RAG &amp; LLM Systems</span>
-            </StaggerItem>
-            <StaggerItem>
-              <CompanionAnchor id="hero" className="mx-auto mb-2" />
-              <h1 className="font-display mb-6 text-6xl font-extrabold md:text-7xl lg:text-8xl">
+            </div>
+            <div>
+              <h1 className="font-display mb-6 text-4xl font-extrabold sm:text-6xl md:text-7xl lg:text-8xl">
                 <span className="block text-ink-primary">Sai Vishnu Vamsi</span>
                 <span className="block text-gradient">Senagasetty</span>
               </h1>
-            </StaggerItem>
-            <StaggerItem>
+            </div>
+            <div>
               <p className="mx-auto mb-12 max-w-4xl text-xl leading-relaxed text-ink-secondary md:text-2xl">
                 AI Developer shipping{' '}
                 <span className="font-semibold text-accent-bright">
@@ -47,26 +46,26 @@ export default function Hero() {
                 </span>
                 {' '}— from existing prototypes to client-ready systems, fast.
               </p>
-            </StaggerItem>
-            <StaggerItem>
+            </div>
+            <div>
               <div className="mb-16 flex flex-col items-center justify-center gap-6 sm:flex-row">
                 <div className="flex items-center gap-3 font-display text-3xl font-bold text-accent">
                   <span>AI</span>
                   <span className="text-ink-muted">|</span>
                   <span className="text-accent-bright">ML</span>
                 </div>
-                <MagneticButton onClick={() => setIsResumeOpen(true)} className="px-8 py-4">
-                  VIEW RESUME
-                </MagneticButton>
+                <button
+                  type="button"
+                  onClick={() => setIsResumeOpen(true)}
+                  className="shine-sweep btn-primary cursor-pointer px-8 py-4"
+                >
+                  <span className="relative z-10">VIEW RESUME</span>
+                </button>
               </div>
-            </StaggerItem>
-          </StaggerReveal>
+            </div>
+          </div>
 
-          <motion.div
-            className={`relative mx-auto max-w-md transition-all duration-1000 ${
-              showChatPrompt ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-            }`}
-          >
+          <div className="relative mx-auto max-w-md">
             <a
               href="#chatbot"
               className="glass glass-hover glass-glow group block rounded-2xl p-6 transition-transform hover:-translate-y-1"
@@ -94,21 +93,16 @@ export default function Hero() {
                 </div>
               </div>
             </a>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {isResumeOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-base/90 backdrop-blur-md"
           onClick={() => setIsResumeOpen(false)}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+          <div
             className="glass glass-glow relative h-[90vh] w-[90vw] max-w-6xl overflow-hidden rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -123,8 +117,8 @@ export default function Hero() {
               </svg>
             </button>
             <iframe src="/resume/VishnuVamsi_AIEngineer.pdf" className="h-full w-full border-0 bg-white" title="Resume" />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </>
   );

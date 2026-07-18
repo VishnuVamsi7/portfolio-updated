@@ -17,7 +17,7 @@ const JSON_TOKENS = [
 const TOKEN_COLOR = {
   k: '#A78BFA',
   s: '#6EE7B7',
-  p: '#6B7280',
+  p: '#A7ADB8',
 };
 
 const FULL_JSON_LENGTH = JSON_TOKENS.reduce((sum, [text]) => sum + text.length, 0);

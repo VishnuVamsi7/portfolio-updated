@@ -1,5 +1,5 @@
 import './globals.css';
-import Providers from './providers';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { siteConfig } from './lib/site';
@@ -16,6 +16,20 @@ const jsonLd = [
   ...getProjectsSchema(),
   getFAQSchema(),
 ];
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+  preload: false,
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+  preload: false,
+});
 
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -72,6 +86,7 @@ export default function RootLayout({ children }) {
           as="image"
           href="/assets/silhouette-transparent.webp?v=3"
           type="image/webp"
+          fetchPriority="high"
         />
         {/* Cover the page before React hydrates so the hero never flashes first */}
         <script
@@ -87,17 +102,36 @@ export default function RootLayout({ children }) {
           />
         ))}
       </head>
-      <body className="min-h-screen flex flex-col">
+      <body
+        className={`${spaceGrotesk.variable} ${inter.variable} min-h-screen flex flex-col font-body`}
+      >
         <div
           id="intro-boot-scrim"
           className="intro-boot-scrim"
           aria-hidden="true"
-        />
-        <Providers>
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-        </Providers>
+        >
+          <div className="intro-boot-aura" />
+          <canvas
+            width="720"
+            height="720"
+            className="intro-boot-image"
+            aria-hidden="true"
+          />
+          <div className="intro-boot-copy">
+            <p
+              className="text-4xl font-extrabold tracking-tight text-ink-primary sm:text-5xl md:text-6xl"
+              style={{ fontFamily: 'system-ui, sans-serif' }}
+            >
+              Vishnu S
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.28em] text-accent-bright sm:text-xs">
+              AI Developer
+            </p>
+          </div>
+        </div>
+        <Navbar />
+        <main className="flex-grow">{children}</main>
+        <Footer />
       </body>
     </html>
   );
