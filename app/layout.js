@@ -1,4 +1,5 @@
 import './globals.css';
+import Script from 'next/script';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -9,6 +10,8 @@ import {
   getFAQSchema,
   getWebSiteSchema,
 } from './lib/structured-data';
+
+const GA_MEASUREMENT_ID = 'G-4W993KDMD2';
 
 const jsonLd = [
   getWebSiteSchema(),
@@ -105,6 +108,18 @@ export default function RootLayout({ children }) {
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} min-h-screen flex flex-col font-body`}
       >
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
         <div
           id="intro-boot-scrim"
           className="intro-boot-scrim"

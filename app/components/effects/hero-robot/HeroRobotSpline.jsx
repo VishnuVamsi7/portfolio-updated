@@ -23,7 +23,7 @@ const SPLINE_SCENE =
  * - lookX, lookY (numbers) — drive head/mouse-follow in your scene graph
  * - react (number) — pulse on click for wave/bounce state machine
  */
-export default function HeroRobotSpline() {
+export default function HeroRobotSpline({ scrollProgress: _scrollProgress = null }) {
   const reduceMotion = useReducedMotion();
   const SplineComponentRef = useRef(null);
   const appRef = useRef(null);

@@ -169,7 +169,8 @@ export async function enhancePitchWithLLM(jdText, baseResult) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        // llama-3.1-8b-instant was decommissioned on Groq (Aug 16, 2026)
+        model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b',
         messages: [
           {
             role: 'system',

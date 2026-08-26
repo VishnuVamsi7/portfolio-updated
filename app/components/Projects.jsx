@@ -2,7 +2,7 @@
 
 import JupyterWorkspace from './projects/JupyterWorkspace';
 import SectionBackground from './effects/SectionBackground';
-import { StaggerReveal, StaggerItem } from './effects/SectionReveal';
+import SectionReveal, { StaggerReveal, StaggerItem } from './effects/SectionReveal';
 import CompanionAnchor from './three/CompanionAnchor';
 import ClientErrorBoundary from './ui/ClientErrorBoundary';
 
@@ -29,7 +29,9 @@ export default function Projects() {
         </StaggerReveal>
 
         <ClientErrorBoundary name="JupyterWorkspace">
-          <JupyterWorkspace />
+          <SectionReveal mode="scrub" scrubDistance={40}>
+            <JupyterWorkspace />
+          </SectionReveal>
         </ClientErrorBoundary>
       </div>
     </section>

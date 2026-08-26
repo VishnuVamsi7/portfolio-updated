@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useReducedMotion } from 'framer-motion';
 import * as THREE from 'three';
+import { ScrollCameraRig } from '../../hero/useScrollCamera';
+import { HERO_CAMERA_PATH } from '../../hero/cameraPath';
 
 const MAX_LOOK = THREE.MathUtils.degToRad(18);
 const LERP = 0.1;
@@ -16,6 +18,10 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
+/**
+ * Robot idle + optional cursor look. Does not touch the camera —
+ * ScrollCameraRig owns camera transform so the two compose cleanly.
+ */
 function ProceduralRobot({ lookEnabled, onReact }) {
   const rootRef = useRef(null);
   const headRef = useRef(null);
@@ -24,7 +30,6 @@ function ProceduralRobot({ lookEnabled, onReact }) {
   const targetRot = useRef({ x: 0, y: 0 });
   const bounceRef = useRef(0);
   const blinkRef = useRef(0);
-  const idlePhase = useRef(0);
 
   useEffect(() => {
     const handler = () => {
@@ -38,7 +43,6 @@ function ProceduralRobot({ lookEnabled, onReact }) {
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
-    idlePhase.current = t;
 
     if (rootRef.current) {
       rootRef.current.position.y = Math.sin(t * 1.4) * 0.07;
@@ -72,7 +76,6 @@ function ProceduralRobot({ lookEnabled, onReact }) {
 
   return (
     <group ref={rootRef} position={[0, -0.15, 0]}>
-      {/* Body */}
       <mesh position={[0, -0.35, 0]} castShadow>
         <cylinderGeometry args={[0.42, 0.48, 0.75, 16]} />
         <meshStandardMaterial color={BODY} metalness={0.35} roughness={0.45} />
@@ -82,13 +85,11 @@ function ProceduralRobot({ lookEnabled, onReact }) {
         <meshStandardMaterial color={ACCENT} emissive={ACCENT} emissiveIntensity={0.35} />
       </mesh>
 
-      {/* Head group — tracks cursor */}
       <group ref={headRef} position={[0, 0.35, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.72, 0.62, 0.55]} />
           <meshStandardMaterial color={BODY_DARK} metalness={0.4} roughness={0.38} />
         </mesh>
-        {/* Antenna */}
         <mesh position={[0, 0.42, 0]}>
           <cylinderGeometry args={[0.03, 0.03, 0.22, 8]} />
           <meshStandardMaterial color={ACCENT_BRIGHT} emissive={ACCENT} emissiveIntensity={0.5} />
@@ -97,7 +98,6 @@ function ProceduralRobot({ lookEnabled, onReact }) {
           <sphereGeometry args={[0.07, 12, 12]} />
           <meshStandardMaterial color={ACCENT_BRIGHT} emissive={ACCENT} emissiveIntensity={0.8} />
         </mesh>
-        {/* Eyes */}
         <mesh ref={leftEyeRef} position={[-0.18, 0.06, 0.29]}>
           <sphereGeometry args={[0.09, 12, 12]} />
           <meshStandardMaterial color={ACCENT_BRIGHT} emissive={ACCENT} emissiveIntensity={1.2} />
@@ -106,7 +106,6 @@ function ProceduralRobot({ lookEnabled, onReact }) {
           <sphereGeometry args={[0.09, 12, 12]} />
           <meshStandardMaterial color={ACCENT_BRIGHT} emissive={ACCENT} emissiveIntensity={1.2} />
         </mesh>
-        {/* Arm wave on react — subtle */}
         <mesh position={[0.48, -0.05, 0.1]} rotation={[0, 0, -0.4]}>
           <boxGeometry args={[0.12, 0.35, 0.12]} />
           <meshStandardMaterial color={BODY} metalness={0.3} roughness={0.5} />
@@ -136,12 +135,11 @@ function StaticRobotFallback() {
 }
 
 /**
- * OPTION B — React Three Fiber procedural robot
+ * OPTION B — React Three Fiber procedural robot + scroll-driven camera.
  *
- * npm install three @react-three/fiber @react-three/drei
- * Set NEXT_PUBLIC_HERO_ROBOT=r3f (default)
+ * @param {{ scrollProgress?: import('framer-motion').MotionValue<number> | null }} props
  */
-export default function HeroRobotR3F() {
+export default function HeroRobotR3F({ scrollProgress = null }) {
   const reduceMotion = useReducedMotion();
   const [lookEnabled, setLookEnabled] = useState(false);
 
@@ -157,11 +155,13 @@ export default function HeroRobotR3F() {
     return <StaticRobotFallback />;
   }
 
+  const start = HERO_CAMERA_PATH.positions[0];
+
   return (
     <Canvas
       className="h-full w-full"
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0.2, 2.4], fov: 42 }}
+      camera={{ position: [start.x, start.y, start.z], fov: HERO_CAMERA_PATH.fov.start }}
       gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
       onClick={triggerReact}
       onPointerMissed={() => {}}
@@ -170,6 +170,7 @@ export default function HeroRobotR3F() {
       <directionalLight position={[2, 3, 4]} intensity={1.1} color="#ffffff" />
       <pointLight position={[-2, 1, 2]} intensity={0.6} color={ACCENT} />
       <pointLight position={[0, -1, 1]} intensity={0.25} color={ACCENT_BRIGHT} />
+      <ScrollCameraRig progress={scrollProgress} enabled={!reduceMotion} />
       <ProceduralRobot lookEnabled={lookEnabled} />
     </Canvas>
   );

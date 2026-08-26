@@ -2,6 +2,7 @@
 
 import { useCallback, useLayoutEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { motion } from 'framer-motion';
 import Hero from './Hero';
 import LandingIntro from './intro/LandingIntro';
 import ClientErrorBoundary from './ui/ClientErrorBoundary';
@@ -21,6 +22,11 @@ const Chatbot = dynamic(() => import('./Chatbot'), { ssr: false });
 function shouldShowIntro() {
   if (typeof window === 'undefined') return false;
   try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('intro') === '1') {
+      sessionStorage.removeItem('introPlayed');
+      return true;
+    }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
     return sessionStorage.getItem('introPlayed') !== 'true';
   } catch {
@@ -34,14 +40,17 @@ function clearIntroPending() {
 }
 
 export default function HomePage() {
-  // null = still deciding (keep cover). Never paint main hero first.
   const [introActive, setIntroActive] = useState(null);
   const [introExiting, setIntroExiting] = useState(false);
+  const [heroEntered, setHeroEntered] = useState(false);
 
   useLayoutEffect(() => {
     const show = shouldShowIntro();
     setIntroActive(show);
-    if (!show) clearIntroPending();
+    if (!show) {
+      clearIntroPending();
+      setHeroEntered(true);
+    }
   }, []);
 
   const handleOpenProject = useCallback((projectId) => {
@@ -55,13 +64,14 @@ export default function HomePage() {
     clearIntroPending();
     setIntroExiting(false);
     setIntroActive(false);
+    setHeroEntered(true);
   }, []);
 
   const showCover = introActive !== false;
+  const showMain = introActive === false || introExiting;
 
   return (
     <>
-      {/* Solid cover until we know intro is skipped, or until LandingIntro paints */}
       {introActive !== true && showCover && (
         <div
           className="fixed inset-0 z-[200] bg-base"
@@ -79,14 +89,20 @@ export default function HomePage() {
         </ClientErrorBoundary>
       )}
 
-      {/* Mount under the intro so the slide-up exit reveals it; hide only while deciding */}
-      <div
+      <motion.div
         className="relative z-10"
-        style={{
-          visibility: introActive === false || introExiting ? 'visible' : 'hidden',
-        }}
-        aria-hidden={introActive !== false}
-        inert={introActive !== false ? '' : undefined}
+        style={{ visibility: showMain ? 'visible' : 'hidden' }}
+        aria-hidden={!showMain}
+        inert={!showMain ? '' : undefined}
+        initial={false}
+        animate={
+          heroEntered
+            ? { y: 0, opacity: 1 }
+            : introExiting
+              ? { y: 56, opacity: 0.85 }
+              : { y: 72, opacity: 0 }
+        }
+        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
       >
         <Hero />
         <DeferredSection id="about" enabled={introActive === false} minHeight={1450}>
@@ -119,7 +135,7 @@ export default function HomePage() {
         <DeferredSection id="chatbot" enabled={introActive === false} minHeight={600}>
           <Chatbot />
         </DeferredSection>
-      </div>
+      </motion.div>
     </>
   );
 }

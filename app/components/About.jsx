@@ -1,5 +1,9 @@
 import SectionBackground from './effects/SectionBackground';
-import SectionReveal, { StaggerReveal, StaggerItem } from './effects/SectionReveal';
+import SectionReveal, {
+  StaggerReveal,
+  StaggerItem,
+  HeroSectionBridge,
+} from './effects/SectionReveal';
 import CompanionAnchor from './three/CompanionAnchor';
 import ClientErrorBoundary from './ui/ClientErrorBoundary';
 import LiveInferenceBio from './about/LiveInferenceBio';
@@ -11,11 +15,13 @@ export default function About() {
       <SectionBackground variant="radial" />
       <CompanionAnchor id="about" className="absolute right-[6%] top-24 hidden xl:block" />
       <div className="container relative mx-auto px-4">
-        <StaggerReveal className="mb-16 text-center">
-          <StaggerItem><span className="section-label">About</span></StaggerItem>
-          <StaggerItem><h2 className="section-title">Learn More <span className="text-gradient">About Me</span></h2></StaggerItem>
-          <StaggerItem><div className="section-divider" /></StaggerItem>
-        </StaggerReveal>
+        <HeroSectionBridge className="mb-16 text-center">
+          <StaggerReveal>
+            <StaggerItem><span className="section-label">About</span></StaggerItem>
+            <StaggerItem><h2 className="section-title">Learn More <span className="text-gradient">About Me</span></h2></StaggerItem>
+            <StaggerItem><div className="section-divider" /></StaggerItem>
+          </StaggerReveal>
+        </HeroSectionBridge>
 
         <div className="mx-auto max-w-3xl">
           <SectionReveal>

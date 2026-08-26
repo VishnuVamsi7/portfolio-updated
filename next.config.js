@@ -2,7 +2,7 @@
 const nextConfig = {
   productionBrowserSourceMaps: true,
   experimental: {
-    optimizePackageImports: ['framer-motion'],
+    optimizePackageImports: ['framer-motion', '@react-three/drei'],
   },
 };
 

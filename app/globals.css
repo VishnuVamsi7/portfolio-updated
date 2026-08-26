@@ -120,13 +120,117 @@
     animation: intro-arrow-bounce 1.4s ease-in-out 3;
   }
 
+  .intro-hud {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 45;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    pointer-events: none;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(196, 200, 208, 0.72);
+  }
+
+  .intro-hud--top {
+    top: 0;
+  }
+
+  .intro-hud--bottom {
+    bottom: 0;
+    padding-bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .intro-hud b {
+    color: #a78bfa;
+    font-weight: 500;
+  }
+
+  .intro-hud-accent {
+    color: rgba(167, 139, 250, 0.85);
+  }
+
+  .intro-scene-copy {
+    animation: intro-copy-enter 420ms ease-out both;
+  }
+
+  .intro-signal {
+    animation: intro-copy-enter 480ms ease-out both;
+  }
+
+  .intro-signal-frame {
+    border: 1px solid rgba(139, 92, 246, 0.28);
+    background: #05060a;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+      0 0 40px rgba(139, 92, 246, 0.18);
+  }
+
+  /* Recolor Gojo cyan/violet source footage toward portfolio accent #8B5CF6 */
+  .intro-signal-video {
+    filter: hue-rotate(-28deg) saturate(0.92) brightness(0.82) contrast(1.12);
+    transform: scale(1.02);
+  }
+
+  .intro-signal-tint {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(10, 11, 14, 0.15) 0%, transparent 35%, rgba(10, 11, 14, 0.45) 100%),
+      radial-gradient(ellipse 70% 55% at 50% 45%, rgba(139, 92, 246, 0.28) 0%, transparent 70%);
+    mix-blend-mode: soft-light;
+  }
+
+  .intro-signal-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 85% 75% at 50% 50%, transparent 40%, rgba(10, 11, 14, 0.72) 100%);
+  }
+
+  .intro-enter-orb {
+    animation: intro-orb-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes intro-orb-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 24px rgba(139, 92, 246, 0.25);
+    }
+    50% {
+      transform: scale(1.06);
+      box-shadow: 0 0 48px rgba(139, 92, 246, 0.45);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .intro-tech-logo,
     .intro-hint,
-    .intro-hint-arrow {
+    .intro-hint-arrow,
+    .intro-scene-copy,
+    .intro-signal,
+    .intro-enter-orb {
       opacity: 1;
       animation: none;
       transform: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .intro-hud {
+      letter-spacing: 0.14em;
+      font-size: 9px;
+    }
+
+    .intro-hud--bottom span:last-child {
+      display: none;
     }
   }
 
