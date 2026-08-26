@@ -107,13 +107,17 @@ export function getSkillTaxonomy() {
     nlp: ['nlp', 'natural language', 'text processing', 'whisper', 'sentiment', 'tf-idf', 'topic modeling'],
     'computer vision': ['computer vision', 'yolo', 'yolov5', 'opencv', 'image', 'detection', 'stable diffusion'],
     docker: ['docker', 'kubernetes', 'container', 'k8s', 'docker compose'],
-    azure: ['azure', 'azure ml', 'cloud', 'render', 'netlify'],
-    sql: ['sql', 'database', 'etl', 'postgresql', 'redis', 'firestore'],
-    javascript: ['javascript', 'react', 'next.js', 'node', 'typescript', 'vite', 'nestjs', 'express'],
+    // Keep aliases specific — bare "cloud" / "database" cause false JD hits.
+    azure: ['azure', 'azure ml', 'microsoft azure'],
+    sql: ['sql'],
+    javascript: ['javascript', 'typescript', 'js', 'ts'],
+    react: ['react', 'react.js', 'reactjs'],
+    'next.js': ['next.js', 'nextjs', 'next js'],
     mobile: ['flutter', 'dart', 'android', 'ios', 'cross-platform'],
     deployment: ['deployment', 'serving', 'mlops', 'ci/cd', 'model deployment', 'gitlab ci', 'github actions'],
-    data: ['data science', 'analytics', 'pandas', 'spark', 'pyspark', 'visualization', 'airflow', 'eda'],
+    data: ['data science', 'pandas', 'spark', 'pyspark', 'airflow', 'eda'],
     backend: ['fastapi', 'nestjs', 'node.js', 'express', 'rest apis', 'pydantic'],
+    mcp: ['model context protocol', 'mcp server', 'mcp servers'],
   };
 
   return { skills: allSkills, aliases };

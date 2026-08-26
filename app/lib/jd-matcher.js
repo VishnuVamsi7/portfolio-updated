@@ -4,10 +4,55 @@ const STOP_WORDS = new Set([
   'the', 'and', 'for', 'with', 'you', 'your', 'our', 'will', 'must', 'have',
   'this', 'that', 'from', 'into', 'able', 'work', 'team', 'role', 'job',
   'years', 'year', 'experience', 'required', 'preferred', 'including', 'using',
+  'more', 'than', 'over', 'such', 'other', 'across', 'within', 'about',
 ]);
+
+/** Escape a literal for RegExp. */
+function escapeRe(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Phrase / token match with boundaries so "R" ≠ every word with "r",
+ * and "data" ≠ "datacenter".
+ */
+function hasPhrase(haystack, phrase) {
+  const p = phrase.toLowerCase().trim();
+  if (!p) return false;
+  const body = escapeRe(p).replace(/\s+/g, '\\s+');
+  const re = new RegExp(`(?:^|[^a-z0-9+#._])${body}(?:[^a-z0-9+#._]|$)`, 'i');
+  return re.test(haystack);
+}
 
 function normalize(text) {
   return text.toLowerCase().replace(/[^a-z0-9+#.\s-]/g, ' ');
+}
+
+/** Acronyms / tokens that collide with other domains (e.g. MCP ≠ Model Context Protocol). */
+const AMBIGUOUS_SKILLS = {
+  mcp: ['model context protocol', 'mcp server', 'mcp servers'],
+  r: ['r programming', 'r language', 'rstudio', 'tidyverse'],
+  go: ['golang', 'go lang'],
+  c: ['c programming', 'embedded c'],
+};
+
+/** Terms from taxonomy that may appear in a JD for this skill. */
+function searchTermsForSkill(skill, aliases) {
+  const sl = skill.toLowerCase();
+  if (AMBIGUOUS_SKILLS[sl]) return AMBIGUOUS_SKILLS[sl];
+
+  const terms = new Set([sl]);
+
+  for (const [key, aliasList] of Object.entries(aliases)) {
+    if (key === sl) {
+      terms.add(key);
+      aliasList.forEach((a) => terms.add(a));
+    }
+    // Listed as an alias of a group: match this skill only — do not inherit siblings
+    // (e.g. FastAPI must not mark NestJS just because both sit under "backend").
+  }
+
+  return [...terms];
 }
 
 function extractJDTerms(jdText) {
@@ -19,25 +64,9 @@ function extractJDTerms(jdText) {
   const matchedSkills = [];
 
   for (const skill of skills) {
-    const skillLower = skill.toLowerCase();
-    if (normalized.includes(skillLower)) {
+    const terms = searchTermsForSkill(skill, aliases);
+    if (terms.some((t) => hasPhrase(normalized, t))) {
       matchedSkills.push(skill);
-      continue;
-    }
-    for (const [, aliasList] of Object.entries(aliases)) {
-      if (aliasList.some((a) => skillLower.includes(a) || a.includes(skillLower))) {
-        if (aliasList.some((a) => normalized.includes(a))) {
-          matchedSkills.push(skill);
-          break;
-        }
-      }
-    }
-  }
-
-  for (const [key, aliasList] of Object.entries(aliases)) {
-    if (aliasList.some((a) => normalized.includes(a))) {
-      const related = skills.filter((s) => normalize(s).includes(key) || key.includes(normalize(s)));
-      related.forEach((s) => matchedSkills.push(s));
     }
   }
 
@@ -45,6 +74,51 @@ function extractJDTerms(jdText) {
     terms: [...unique],
     matchedSkills: [...new Set(matchedSkills)],
   };
+}
+
+/**
+ * Role-domain fit vs an AI/ML engineer profile.
+ * Supply-chain PM JDs that only name "AI" as infrastructure get a hard penalty.
+ */
+function roleFitAdjustment(jdText) {
+  const n = normalize(jdText);
+
+  const supplyChain =
+    hasPhrase(n, 'supply chain') ||
+    hasPhrase(n, 'logistics') ||
+    hasPhrase(n, 'procurement') ||
+    hasPhrase(n, 'sourcing') ||
+    hasPhrase(n, 'demand planning') ||
+    hasPhrase(n, 'fulfillment');
+
+  const programMgmt =
+    hasPhrase(n, 'program manager') ||
+    hasPhrase(n, 'project manager') ||
+    hasPhrase(n, 'program management');
+
+  const aiEngRole =
+    hasPhrase(n, 'machine learning') ||
+    hasPhrase(n, 'ml engineer') ||
+    hasPhrase(n, 'ai engineer') ||
+    hasPhrase(n, 'ai developer') ||
+    hasPhrase(n, 'software engineer') ||
+    hasPhrase(n, 'data scientist') ||
+    hasPhrase(n, 'llm') ||
+    hasPhrase(n, 'rag') ||
+    hasPhrase(n, 'full stack') ||
+    hasPhrase(n, 'fullstack');
+
+  const heavyScPm = supplyChain && programMgmt && !aiEngRole;
+  const lightAiOnly =
+    hasPhrase(n, 'ai') &&
+    !aiEngRole &&
+    (supplyChain || programMgmt);
+
+  if (heavyScPm) return -50;
+  if (supplyChain && !aiEngRole) return -40;
+  if (programMgmt && !aiEngRole && lightAiOnly) return -35;
+  if (aiEngRole) return 8;
+  return 0;
 }
 
 function scoreProject(project, jdTerms, matchedSkills) {
@@ -55,19 +129,21 @@ function scoreProject(project, jdTerms, matchedSkills) {
   );
 
   for (const skill of matchedSkills) {
-    if (corpus.includes(normalize(skill))) {
+    if (hasPhrase(corpus, skill) || project.techStack.some((t) => hasPhrase(normalize(t), skill))) {
       score += 12;
       reasons.push(`Uses ${skill}`);
     }
   }
 
   for (const term of jdTerms) {
-    if (corpus.includes(term)) {
-      score += 4;
-    }
+    if (term.length < 4) continue;
+    if (hasPhrase(corpus, term)) score += 2;
   }
 
-  if (project.tags.includes('AI') && jdTerms.some((t) => ['ai', 'llm', 'rag', 'ml'].includes(t))) {
+  if (
+    project.tags.includes('AI') &&
+    jdTerms.some((t) => ['ai', 'llm', 'rag', 'ml', 'machine'].includes(t))
+  ) {
     score += 8;
     reasons.push('AI/ML aligned');
   }
@@ -81,14 +157,15 @@ function scoreExperience(exp, jdTerms, matchedSkills) {
   const corpus = normalize([exp.title, exp.company, exp.summary, ...exp.skills].join(' '));
 
   for (const skill of matchedSkills) {
-    if (corpus.includes(normalize(skill))) {
+    if (hasPhrase(corpus, skill) || exp.skills.some((s) => hasPhrase(normalize(s), skill))) {
       score += 10;
       reasons.push(`${exp.title}: ${skill}`);
     }
   }
 
   for (const term of jdTerms) {
-    if (corpus.includes(term)) score += 3;
+    if (term.length < 4) continue;
+    if (hasPhrase(corpus, term)) score += 2;
   }
 
   return { score, reasons: [...new Set(reasons)].slice(0, 2), item: exp };
@@ -96,6 +173,7 @@ function scoreExperience(exp, jdTerms, matchedSkills) {
 
 export function matchJD(jdText) {
   const { terms, matchedSkills } = extractJDTerms(jdText);
+  const roleAdj = roleFitAdjustment(jdText);
 
   const projectResults = profile.projects
     .map((project) => {
@@ -113,21 +191,28 @@ export function matchJD(jdText) {
   const topProjects = projectResults.slice(0, 3);
   const topExperience = experienceResults.slice(0, 2);
 
-  const maxPossible = Math.max(matchedSkills.length * 12 + 20, 40);
-  const rawScore =
-    topProjects.reduce((s, p) => s + p.score, 0) +
-    topExperience.reduce((s, e) => s + e.score, 0) +
-    matchedSkills.length * 5;
-  const matchScore = Math.min(98, Math.max(25, Math.round((rawScore / maxPossible) * 100)));
+  const projectPts = topProjects.reduce((s, p) => s + p.score, 0);
+  const expPts = topExperience.reduce((s, e) => s + e.score, 0);
+  // Reward real skill hits, but don't let a handful of generic tools (SQL, Excel-adjacent) dominate.
+  const skillPts = matchedSkills.length * 4;
+
+  const raw = projectPts * 0.35 + expPts * 0.25 + skillPts * 0.4;
+  // Normalize against a realistic “strong AI eng JD” envelope (~120).
+  let matchScore = Math.round((raw / 120) * 100) + roleAdj;
+  matchScore = Math.max(5, Math.min(95, matchScore));
+
+  // Hard ceiling when domain is clearly wrong (e.g. Principal Supply Chain PM).
+  if (roleAdj <= -40) matchScore = Math.min(matchScore, 28);
+  else if (roleAdj <= -30) matchScore = Math.min(matchScore, 40);
 
   const topSkills = matchedSkills.slice(0, 6);
-  const pitch = generatePitch(matchScore, topSkills, topProjects);
+  const pitch = generatePitch(matchScore, topSkills, topProjects, roleAdj);
 
   return {
     matchScore,
     pitch,
     matchedSkills: topSkills,
-    missingSkills: findMissingSkills(matchedSkills),
+    missingSkills: findMissingSkills(matchedSkills, jdText),
     projects: topProjects,
     experience: topExperience.map((e) => ({
       id: e.item.id,
@@ -136,30 +221,40 @@ export function matchJD(jdText) {
       score: e.score,
       reasons: e.reasons,
     })),
+    roleFit: roleAdj,
   };
 }
 
-function findMissingSkills(found) {
-  const core = ['Python', 'Machine Learning', 'RAG', 'TensorFlow', 'PyTorch', 'Docker'];
-  return core.filter((s) => !found.includes(s)).slice(0, 3);
+function findMissingSkills(found, jdText) {
+  const n = normalize(jdText);
+  const core = ['Python', 'Machine Learning', 'RAG', 'TensorFlow', 'PyTorch', 'Docker', 'FastAPI', 'TypeScript'];
+  return core.filter((s) => !found.includes(s) && hasPhrase(n, s.toLowerCase())).slice(0, 4);
 }
 
-function generatePitch(score, skills, topProjects) {
+function generatePitch(score, skills, topProjects, roleAdj) {
   const skillStr = skills.length ? skills.slice(0, 4).join(', ') : 'AI, ML, and software engineering';
   const projectStr = topProjects[0]?.title || 'end-to-end AI/ML projects';
 
-  if (score >= 80) {
+  if (roleAdj <= -40 || score < 35) {
+    return `Weak fit for this role. The JD targets supply-chain / program leadership more than hands-on AI engineering. Sai Vishnu Vamsi Senagasetty is strongest as an AI Developer (RAG, FastAPI, LLM backends)—overlap is limited to transferable tools like ${skillStr || 'data/automation fundamentals'}, not the core job scope.`;
+  }
+  if (score >= 75) {
     return `Strong fit. Sai Vishnu Vamsi Senagasetty brings direct experience in ${skillStr}, with flagship work on ${projectStr}. He ships production RAG systems, model deployment pipelines, and full-stack AI products recruiters can evaluate live on this portfolio.`;
   }
-  if (score >= 60) {
+  if (score >= 55) {
     return `Good fit. Core overlap in ${skillStr} maps to ${projectStr} and related ML work. Sai combines graduate-level CS training (University of Houston) with hands-on LLM, NLP, and deployment experience.`;
   }
-  return `Partial fit with transferable strengths in ${skillStr}. Sai Vishnu Vamsi Senagasetty is an AI/ML engineer who learns fast—see ${projectStr} and the live RAG assistant for proof of delivery.`;
+  if (score >= 35) {
+    return `Partial fit with transferable strengths in ${skillStr}. Sai Vishnu Vamsi Senagasetty is an AI/ML engineer who learns fast—see ${projectStr} and the live RAG assistant for proof of delivery.`;
+  }
+  return `Limited fit. This role’s primary requirements sit outside Sai’s AI/ML engineering focus. Relevant bridges: ${skillStr}. Strongest evidence remains ${projectStr} and production RAG delivery at Zibtek.`;
 }
 
 export async function enhancePitchWithLLM(jdText, baseResult) {
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return baseResult;
+  if (!apiKey || !apiKey.startsWith('gsk_')) {
+    return baseResult;
+  }
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -175,11 +270,11 @@ export async function enhancePitchWithLLM(jdText, baseResult) {
           {
             role: 'system',
             content:
-              'You write concise recruiter pitches in 2-3 sentences. Use only facts provided. No fabrication.',
+              'You write concise recruiter pitches in 2-3 sentences. Use only facts provided. No fabrication. If matchScore is under 40 or the JD is a poor domain fit (e.g. supply chain PM vs AI engineer), say the fit is weak and do not claim strong alignment.',
           },
           {
             role: 'user',
-            content: `JD excerpt: ${jdText.slice(0, 1500)}\n\nCandidate skills: ${baseResult.matchedSkills.join(', ')}\nTop projects: ${baseResult.projects.map((p) => p.title).join('; ')}\nBase pitch: ${baseResult.pitch}\n\nRewrite pitch only.`,
+            content: `JD excerpt: ${jdText.slice(0, 1500)}\n\nMatch score: ${baseResult.matchScore}/100\nCandidate skills hit: ${baseResult.matchedSkills.join(', ') || 'none'}\nTop projects: ${baseResult.projects.map((p) => p.title).join('; ') || 'none'}\nBase pitch: ${baseResult.pitch}\n\nRewrite pitch only.`,
           },
         ],
         max_tokens: 200,
