@@ -6,6 +6,7 @@ import { Starfield } from './Starfield';
 import { TunnelRings } from './TunnelRings';
 import { BranchGuides } from './BranchGuides';
 import { Constellations } from './Constellations';
+import { SmokeVeil } from './SmokeVeil';
 import { WORMHOLE_JOURNEY } from './journeyPath';
 
 /**
@@ -32,10 +33,12 @@ export default function WormholeCanvas({ progress, enabled = true }) {
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         <color attach="background" args={['#04060d']} />
+        <fogExp2 attach="fog" args={['#04060d', 0.026]} />
         <Starfield />
         <TunnelRings />
         <BranchGuides />
         <Constellations />
+        <SmokeVeil />
         <JourneyCameraRig progress={progress} enabled={enabled} />
       </Canvas>
     </div>

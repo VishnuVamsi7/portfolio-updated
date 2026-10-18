@@ -13,6 +13,7 @@ import { useScroll, useSpring } from 'framer-motion';
 import WormholeCanvas, { StaticFallback } from '../components/wormhole/WormholeCanvas';
 import HeroStation from '../components/wormhole/sections/HeroStation';
 import ProjectsStation from '../components/wormhole/sections/ProjectsStation';
+import ExperienceStation from '../components/wormhole/sections/ExperienceStation';
 import SkillsStation from '../components/wormhole/sections/SkillsStation';
 import ContactStation from '../components/wormhole/sections/ContactStation';
 
@@ -61,6 +62,10 @@ export default function WormholePreviewPage() {
 
         <div className="flex min-h-[130vh] w-full items-center">
           <ProjectsStation />
+        </div>
+
+        <div className="flex min-h-[130vh] w-full items-center">
+          <ExperienceStation />
         </div>
 
         <div className="flex min-h-[130vh] w-full items-center">

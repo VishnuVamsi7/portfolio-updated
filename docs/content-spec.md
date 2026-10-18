@@ -45,6 +45,29 @@
 - **Figma note:** three category columns, two glass project cards each; card =
   title, one-line outcome, tech-stack line, repo link.
 
+## Station 02b — Experience (tunnel cruise)
+
+Timeline, newest first. No invented achievements — entries without documented
+detail show role + company + dates only.
+
+1. **AI Developer — Zibtek · Houston, TX** (Apr 2026–Present, Current)
+   Production RAG/LLM systems: FastAPI + FAISS retrieval, intent routing,
+   policy validation, React chat UI, lead scoring. Client-facing: requirements
+   gathering, architecture walkthroughs, technical interviews, delivery
+   leadership. ~45% fewer ungrounded answers, ~35% relevance lift,
+   ~30% lead completion.
+2. **AI Software Engineer — boomerroomers LLC** (Jan 2026–Apr 2026)
+3. **AI Researcher Fellow (Remote) — Handshake** (Dec 2025–Feb 2026)
+   Ground-truth evaluation datasets from end-to-end model stress tests,
+   supporting iterative model training.
+4. **NLP Research Assistant — University of Houston** (Jan 2024–Jul 2024)
+
+Education: M.S. Computer Science, University of Houston (2023–2025);
+B.Tech Computer Science, SRM University, AP (2019–2023).
+
+- **Figma note:** vertical timeline, glass cards, teal "Current" badge;
+  education as two small cards below.
+
 ## Station 03 — Skills (constellation clusters)
 
 ### Cluster 1 — AI / Backend (sky blue)

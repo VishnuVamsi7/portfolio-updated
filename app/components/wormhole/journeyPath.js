@@ -8,8 +8,8 @@ import * as THREE from 'three';
  * (framer-motion useScroll), not per-section.
  *
  * Stations (fraction of page scroll):
- *   0.00 hero · 0.38 projects (wormhole forks) · 0.66 skills (constellations)
- *   1.00 contact (emerge)
+ *   0.00 hero · 0.36 projects (wormhole forks) · 0.52 experience (trail)
+ *   0.68 skills (constellations) · 1.00 contact (emerge)
  */
 export const WORMHOLE_JOURNEY = {
   lerpFactor: 0.07,
@@ -17,8 +17,9 @@ export const WORMHOLE_JOURNEY = {
 
   stations: [
     { id: 'hero', label: 'Hero — starfield', at: 0.0 },
-    { id: 'projects', label: 'Projects — wormhole forks', at: 0.38 },
-    { id: 'skills', label: 'Skills — constellations', at: 0.66 },
+    { id: 'projects', label: 'Projects — wormhole forks', at: 0.36 },
+    { id: 'experience', label: 'Experience — trail', at: 0.52 },
+    { id: 'skills', label: 'Skills — constellations', at: 0.68 },
     { id: 'contact', label: 'Contact — emerge', at: 1.0 },
   ],
 

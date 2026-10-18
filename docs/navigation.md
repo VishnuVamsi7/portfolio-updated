@@ -24,9 +24,10 @@ family — before emerging into calm for contact.
 | # | Station | Scroll ~ | 3D beat | DOM content |
 |---|---------|----------|---------|-------------|
 | 01 | Hero | 0.00–0.20 | Starfield drift, slow | Name, title, tagline, CTAs (RAG assistant, Am I a Fit?) |
-| 02 | Projects | 0.30–0.55 | Wormhole forks — camera swings past 3 glowing branches | Category panels: **RAG / LLM**, **Full-Stack**, **Data / ML** — 2 projects each as glass cards |
-| 03 | Skills | 0.60–0.80 | Constellation clusters drift by | **AI / Backend** (Python–FastAPI–LangChain–FAISS), **Frontend** (React–Next–TS–Tailwind), **Data / DevOps** (Docker–CI/CD–PostgreSQL) |
-| 04 | Contact | 0.85–1.00 | Emerge — calm starfield, slow | Email, LinkedIn, GitHub, availability line |
+| 02 | Projects | 0.28–0.48 | Wormhole forks — camera swings past 3 glowing branches | Category panels: **RAG / LLM**, **Full-Stack**, **Data / ML** — 2 projects each as glass cards |
+| 03 | Experience | 0.48–0.62 | Tunnel cruise — smoke thickens with scroll speed | Timeline: Zibtek (current), boomerroomers, Handshake, UH research; education block |
+| 04 | Skills | 0.62–0.82 | Constellation clusters drift by | **AI / Backend** (Python–FastAPI–LangChain–FAISS), **Frontend** (React–Next–TS–Tailwind), **Data / DevOps** (Docker–CI/CD–PostgreSQL) |
+| 05 | Contact | 0.85–1.00 | Emerge — calm starfield, slow | Email, LinkedIn, GitHub, availability line |
 
 ## Figma mapping (for MCP codegen)
 

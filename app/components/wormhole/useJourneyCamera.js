@@ -9,6 +9,7 @@ import {
   createJourneyCurve,
   createJourneyLookCurve,
 } from './journeyPath';
+import { scrollVelocity } from './scrollVelocity';
 
 const _targetPos = new THREE.Vector3();
 const _targetLook = new THREE.Vector3();
@@ -32,6 +33,7 @@ export function JourneyCameraRig({
   const curve = useMemo(() => createJourneyCurve(path), [path]);
   const lookCurve = useMemo(() => createJourneyLookCurve(path), [path]);
   const smoothT = useRef(0);
+  const prevT = useRef(0);
 
   useFrame((state, delta) => {
     const camera = state.camera;
@@ -40,6 +42,14 @@ export function JourneyCameraRig({
     smoothT.current = THREE.MathUtils.lerp(smoothT.current, raw, lerp);
 
     const t = smoothT.current;
+
+    // Scroll velocity → drives SmokeVeil opacity + fog density. Smoothed so
+    // the smoke thickens and settles instead of flickering.
+    const d = Math.min(Math.max(delta, 0.0001), 0.1);
+    const inst = Math.abs(t - prevT.current) / d;
+    prevT.current = t;
+    const target = Math.min(inst * 2.2, 1.5);
+    scrollVelocity.current += (target - scrollVelocity.current) * (1 - Math.exp(-d * 5));
     curve.getPointAt(t, _targetPos);
     _targetPos.x += branchSwingAt(t, path.branchSwing);
     lookCurve.getPointAt(t, _targetLook);
