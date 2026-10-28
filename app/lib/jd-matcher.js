@@ -1,4 +1,5 @@
 import { profile, getSkillTaxonomy } from '../data/profile';
+import { getSkillTier } from '../data/skills';
 
 const STOP_WORDS = new Set([
   'the', 'and', 'for', 'with', 'you', 'your', 'our', 'will', 'must', 'have',
@@ -62,17 +63,23 @@ function extractJDTerms(jdText) {
 
   const { skills, aliases } = getSkillTaxonomy();
   const matchedSkills = [];
+  const exposureSkills = [];
 
   for (const skill of skills) {
     const terms = searchTermsForSkill(skill, aliases);
     if (terms.some((t) => hasPhrase(normalized, t))) {
-      matchedSkills.push(skill);
+      // Exposure-tier skills are mentioned, not mastered: they never score
+      // match points and never appear in pitches as experience. They are
+      // reported separately so the UI can show them as gaps.
+      if (getSkillTier(skill) === 'exposure') exposureSkills.push(skill);
+      else matchedSkills.push(skill);
     }
   }
 
   return {
     terms: [...unique],
     matchedSkills: [...new Set(matchedSkills)],
+    exposureSkills: [...new Set(exposureSkills)],
   };
 }
 
@@ -172,7 +179,7 @@ function scoreExperience(exp, jdTerms, matchedSkills) {
 }
 
 export function matchJD(jdText) {
-  const { terms, matchedSkills } = extractJDTerms(jdText);
+  const { terms, matchedSkills, exposureSkills } = extractJDTerms(jdText);
   const roleAdj = roleFitAdjustment(jdText);
 
   const projectResults = profile.projects
@@ -212,6 +219,7 @@ export function matchJD(jdText) {
     matchScore,
     pitch,
     matchedSkills: topSkills,
+    exposureSkills,
     missingSkills: findMissingSkills(matchedSkills, jdText),
     projects: topProjects,
     experience: topExperience.map((e) => ({
@@ -228,7 +236,17 @@ export function matchJD(jdText) {
 function findMissingSkills(found, jdText) {
   const n = normalize(jdText);
   const core = ['Python', 'Machine Learning', 'RAG', 'TensorFlow', 'PyTorch', 'Docker', 'FastAPI', 'TypeScript'];
-  return core.filter((s) => !found.includes(s) && hasPhrase(n, s.toLowerCase())).slice(0, 4);
+  // "Machine Learning" is not a taxonomy entry, so it can never be "found"
+  // directly; count it as covered when the JD already matched a real ML skill.
+  const mlCovered = ['Deep Learning', 'Scikit-learn', 'Model Tuning', 'Reinforcement Learning'].some((s) =>
+    found.includes(s)
+  );
+  return core
+    .filter((s) => {
+      if (s === 'Machine Learning' && mlCovered) return false;
+      return !found.includes(s) && hasPhrase(n, s.toLowerCase());
+    })
+    .slice(0, 4);
 }
 
 function generatePitch(score, skills, topProjects, roleAdj) {

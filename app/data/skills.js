@@ -205,6 +205,89 @@ export const skillCategories = [
 
 export const allSkills = [...new Set(skillCategories.flatMap((c) => c.skills))];
 
+/**
+ * Proficiency tiers — how much the JD matcher may claim for a skill.
+ * - core: production experience (ships at Zibtek or in deployed systems).
+ * - working: used in personal projects or coursework, not production.
+ * - exposure: familiar from study or a benchmark, NEVER production work.
+ *   Exposure skills never score match points and never appear in generated
+ *   pitches as experience; a JD requiring one shows it as a gap instead.
+ *   (PyTorch / TensorFlow: the "TF Serving vs TorchServe" project is a
+ *   serving benchmark study, not production TF/PyTorch work.)
+ */
+export const EXPOSURE_SKILLS = new Set([
+  'PyTorch',
+  'TensorFlow',
+  'TensorFlow Serving',
+  'TorchServe',
+  'Kubernetes',
+  'Spark',
+  'PySpark',
+  'Hadoop',
+  'Databricks',
+  'Palantir Foundry',
+  'Power BI',
+  'Tableau',
+]);
+
+export const CORE_SKILLS = new Set([
+  'Python',
+  'TypeScript',
+  'JavaScript',
+  'SQL',
+  'HTML/CSS',
+  'React',
+  'Next.js',
+  'Vite',
+  'Tailwind',
+  'FastAPI',
+  'NestJS',
+  'Node.js',
+  'Express',
+  'REST APIs',
+  'Pydantic',
+  'Firebase Auth',
+  'Firestore',
+  'Redis',
+  'PostgreSQL',
+  'httpx',
+  'NDJSON Streaming',
+  'Access Control',
+  'RAG',
+  'FAISS',
+  'Vector Search',
+  'LangChain',
+  'Groq',
+  'Whisper',
+  'LLM Integration',
+  'Prompt Engineering',
+  'Prompt Routing',
+  'Prompt Chaining',
+  'Sentence Transformers',
+  'ONNX',
+  'MCP',
+  'Content Safety',
+  'Async Jobs',
+  'AI Pipelines',
+  'pandas',
+  'NumPy',
+  'Docker',
+  'Docker Compose',
+  'Git',
+  'GitHub',
+  'GitHub Actions',
+  'GitLab CI',
+  'Render',
+  'Netlify',
+  'pytest',
+]);
+
+export function getSkillTier(skill) {
+  if (EXPOSURE_SKILLS.has(skill)) return 'exposure';
+  if (CORE_SKILLS.has(skill)) return 'core';
+  return 'working';
+}
+
 export function getCategoryForSkill(skillName) {
   return skillCategories.find((c) => c.skills.includes(skillName)) ?? null;
 }

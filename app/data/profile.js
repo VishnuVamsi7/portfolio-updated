@@ -39,6 +39,24 @@ export const profile = {
         'AI Developer using STAR delivery on confidential client work: evolved a basic chatbot into FastAPI/RAG with ~45% fewer ungrounded answers, plus NestJS/Next backends and AI-accelerated shipping (~40–50% faster milestones).',
     },
     {
+      id: 'boomerroomers-ai',
+      title: 'AI Software Engineer',
+      company: 'boomerroomers LLC',
+      period: 'January 2026 – April 2026',
+      skills: [
+        'RAG',
+        'LLMs',
+        'Llama-3.3-70B',
+        'Groq',
+        'Gemini',
+        'MongoDB Atlas',
+        'Vector Search',
+        'Semantic Caching',
+      ],
+      summary:
+        'Built a multi-tier AI deflection system and scalable RAG pipeline for a global housing platform: automated resolution of 70% of user queries at zero marginal cost and cut operational costs by 98%; a Guided Discovery onboarding agent improved completion by 30%.',
+    },
+    {
       id: 'develop-for-good',
       title: 'Software Engineering Fellow',
       company: 'Develop for Good (Client: Rasdo NGO)',
@@ -48,10 +66,19 @@ export const profile = {
         'Led NGO website from Figma to production with payment API integration and Agile delivery.',
     },
     {
-      id: 'ml-engineer-intern',
-      title: 'ML Engineer',
-      company: 'AI/ML Research Intern',
-      period: 'January 2025 - Present',
+      id: 'handshake-fellow',
+      title: 'AI Researcher Fellow',
+      company: 'Handshake',
+      period: 'December 2025 – February 2026',
+      skills: ['Red-Teaming', 'LLM Evaluation', 'Prompt Engineering', 'Research'],
+      summary:
+        'Constructed red-teaming prompt structures probing model boundaries and evaluated LLM code generation via end-to-end web-application stress tests, producing ground-truth datasets for iterative model training.',
+    },
+    {
+      id: 'grandios-ai',
+      title: 'AI Research Intern',
+      company: 'Grandios Mobility',
+      period: 'August 2024 – December 2024',
       skills: ['Machine Learning', 'Flutter', 'NLP', 'Speech-to-Text', 'ML Pipelines'],
       summary:
         'Built ML voice-to-ride booking pipeline and accelerated product timelines with automation.',
@@ -60,7 +87,7 @@ export const profile = {
       id: 'instructional-assistant',
       title: 'Instructional Assistant',
       company: 'University of Houston',
-      period: 'September 2024 - Present',
+      period: 'September 2024 – February 2026',
       skills: ['HTML/CSS', 'CMS', 'AI Workflows', 'Adobe', 'Web Development'],
       summary:
         'Modernized university websites and introduced AI-assisted content workflows.',
@@ -101,12 +128,15 @@ export const profile = {
 export function getSkillTaxonomy() {
   const aliases = {
     'machine learning': ['ml', 'machine learning', 'predictive analytics', 'deep learning', 'scikit-learn', 'mlflow'],
-    'deep learning': ['deep learning', 'neural network', 'cnn', 'rnn', 'transformer', 'pytorch', 'tensorflow', 'unet'],
-    python: ['python', 'pytorch', 'tensorflow', 'scikit-learn', 'pandas', 'fastapi', 'numpy'],
+    // Aliases are exact: an alias must never credit a different skill.
+    // (PyTorch / TensorFlow / Kubernetes are exposure-tier — they must not
+    // light up Python, Deep Learning, or Docker when a JD mentions them.)
+    'deep learning': ['deep learning', 'neural network', 'cnn', 'rnn', 'transformer', 'unet'],
+    python: ['python', 'scikit-learn', 'pandas', 'fastapi', 'numpy'],
     rag: ['rag', 'retrieval', 'llm', 'langchain', 'groq', 'prompt engineering', 'faiss', 'vector search', 'onnx'],
     nlp: ['nlp', 'natural language', 'text processing', 'whisper', 'sentiment', 'tf-idf', 'topic modeling'],
-    'computer vision': ['computer vision', 'yolo', 'yolov5', 'opencv', 'image', 'detection', 'stable diffusion'],
-    docker: ['docker', 'kubernetes', 'container', 'k8s', 'docker compose'],
+    'computer vision': ['computer vision', 'yolo', 'yolov5', 'opencv', 'stable diffusion'],
+    docker: ['docker', 'container', 'docker compose'],
     // Keep aliases specific — bare "cloud" / "database" cause false JD hits.
     azure: ['azure', 'azure ml', 'microsoft azure'],
     sql: ['sql'],
