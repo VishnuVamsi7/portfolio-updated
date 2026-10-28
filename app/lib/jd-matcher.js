@@ -606,7 +606,10 @@ function generatePitch(score, skills, topProjects, roleAdj) {
   const projectStr = topProjects[0]?.title || 'end-to-end AI/ML projects';
 
   if (roleAdj <= -40 || score < 35) {
-    return `Weak fit for this role. The JD targets supply-chain / program leadership more than hands-on AI engineering. Sai Vishnu Vamsi Senagasetty is strongest as an AI Developer (RAG, FastAPI, LLM backends)—overlap is limited to transferable tools like ${skillStr || 'data/automation fundamentals'}, not the core job scope.`;
+    if (roleAdj <= -30) {
+      return `Weak fit for this role. The JD targets supply-chain / program leadership more than hands-on AI engineering. Sai Vishnu Vamsi Senagasetty is strongest as an AI Developer (RAG, FastAPI, LLM backends)—overlap is limited to transferable tools like ${skillStr || 'data/automation fundamentals'}, not the core job scope.`;
+    }
+    return `Weak fit for this role. The core requirements sit outside Sai Vishnu Vamsi Senagasetty's demonstrated experience — see the requirement table for the gaps. His strongest evidence remains ${projectStr} and production RAG delivery at Zibtek.`;
   }
   if (score >= 75) {
     return `Strong fit. Sai Vishnu Vamsi Senagasetty brings direct experience in ${skillStr}, with flagship work on ${projectStr}. He ships production RAG systems, model deployment pipelines, and full-stack AI products recruiters can evaluate live on this portfolio.`;
