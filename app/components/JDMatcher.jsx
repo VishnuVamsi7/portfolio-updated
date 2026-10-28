@@ -200,6 +200,48 @@ export default function JDMatcher({ onOpenProject }) {
                       ))}
                     </div>
                   )}
+                  {result.exposureSkills?.length > 0 && (
+                    <p className="mt-3 text-xs text-ink-muted">
+                      Familiar, not production experience: {result.exposureSkills.join(', ')}
+                    </p>
+                  )}
+                  {result.missingSkills?.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Gaps to note</h4>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {result.missingSkills.map((s) => (
+                          <span key={s} className="rounded-full border border-red-400/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-300">
+                            ✗ {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {result.roleFit != null && (
+                    <p className="mt-3 text-xs text-ink-muted">
+                      Role-domain fit:{' '}
+                      {result.roleFit >= 8
+                        ? 'AI/ML engineering role — matches this profile.'
+                        : result.roleFit <= -30
+                          ? 'outside AI/ML engineering — the score is capped for this domain.'
+                          : 'mixed domain — read the gaps above before trusting the score.'}
+                    </p>
+                  )}
+                  {result.experience?.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Relevant experience</h4>
+                      <ul className="mt-2 space-y-1 text-sm text-ink-secondary">
+                        {result.experience.map((e) => (
+                          <li key={e.id}>
+                            <span className="font-semibold text-ink-primary">{e.title}</span>
+                            {' — '}
+                            {e.company}
+                            {e.reasons?.length > 0 && <span className="text-ink-muted"> ({e.reasons.join(' · ')})</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
 
