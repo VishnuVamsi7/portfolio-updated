@@ -18,7 +18,9 @@ export async function POST(request) {
     }
 
     let result = matchJD(jdText);
-    result = await enhancePitchWithLLM(jdText, result);
+    // The LLM enhancer only ever sees the scored requirement table, never
+    // the raw JD (untrusted text — see jd-matcher.js).
+    result = await enhancePitchWithLLM(result.requirements, result);
 
     return NextResponse.json(result);
   } catch (error) {

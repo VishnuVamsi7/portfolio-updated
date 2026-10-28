@@ -217,6 +217,43 @@ export default function JDMatcher({ onOpenProject }) {
                       </div>
                     </div>
                   )}
+                  {result.flags?.length > 0 && (
+                    <div className="mt-3 space-y-1">
+                      {result.flags.map((f) => (
+                        <p key={f.type} className="rounded-lg border border-amber-400/30 bg-amber-500/10 p-2 text-xs text-amber-300">
+                          ⚠ {f.message}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                  {result.requirements?.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
+                        Requirement breakdown ({result.scoreBreakdown?.requiredEvidenced ?? '–'} of{' '}
+                        {result.scoreBreakdown?.requiredTotal ?? '–'} required met)
+                      </h4>
+                      <ul className="mt-2 space-y-2 text-sm">
+                        {result.requirements.map((r, i) => (
+                          <li key={i} className="rounded-lg border border-line-subtle bg-surface/60 p-2">
+                            <p className="text-ink-primary">
+                              <span className="mr-1 font-bold">
+                                {r.status === 'evidenced' ? '✓' : r.status === 'partial' ? '~' : '✗'}
+                              </span>
+                              {r.text}
+                              {!r.required && <span className="ml-2 text-xs text-ink-muted">(preferred)</span>}
+                            </p>
+                            {(r.evidence?.length > 0 || r.note) && (
+                              <p className="mt-1 text-xs text-ink-muted">
+                                {r.evidence?.length > 0 ? `Evidence: ${r.evidence.join('; ')}` : ''}
+                                {r.evidence?.length > 0 && r.note ? ' — ' : ''}
+                                {r.note || ''}
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   {result.roleFit != null && (
                     <p className="mt-3 text-xs text-ink-muted">
                       Role-domain fit:{' '}
