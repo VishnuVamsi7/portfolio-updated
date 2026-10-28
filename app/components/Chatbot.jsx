@@ -1,11 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { springOverlay } from '../lib/motion';
 
 const RAG_ENDPOINT = 'https://chatbot-rag-mun6.onrender.com/receive';
+// Shown instead of any backend error text: a recruiter must never read
+// billing internals or stack traces as a chat message.
+const FRIENDLY_DOWN_MESSAGE =
+  'The assistant is temporarily down — please try again in a bit, or email me at saivishnuvamsis07@gmail.com.';
+const REQUEST_TIMEOUT_MS = 60000;
+
+/** "experience-zibtek-ai-part-2" -> "experience: zibtek ai part 2". */
+function formatSource(source) {
+  const label = String(source.id || 'source').replace(/-/g, ' ');
+  return `${source.section || 'source'}: ${label}`;
+}
+
+function getOrCreateSessionId() {
+  try {
+    const stored = window.sessionStorage.getItem('rag-session-id');
+    if (stored) return stored;
+    const id = (window.crypto?.randomUUID && window.crypto.randomUUID()) || `s-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    window.sessionStorage.setItem('rag-session-id', id);
+    return id;
+  } catch {
+    return `s-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+}
 
 export default function Chatbot() {
   const [mounted, setMounted] = useState(false);
@@ -15,7 +38,7 @@ export default function Chatbot() {
     {
       role: 'assistant',
       content:
-        "Hello! I'm your AI assistant. Ask me anything about Sai Vishnu Vamsi Senagasetty, his projects, skills, or background. Switch to **JD Fit** to paste a job description.",
+        "Hello! I'm your AI assistant. Ask me anything about Sai Vishnu Vamsi Senagasetty, his projects, skills, or background. Switch to JD Fit to paste a job description.",
     },
   ]);
   const [input, setInput] = useState('');
@@ -23,6 +46,11 @@ export default function Chatbot() {
   const [jdResult, setJdResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const sessionIdRef = useRef(null);
+  if (sessionIdRef.current === null && typeof window !== 'undefined') {
+    sessionIdRef.current = getOrCreateSessionId();
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -37,38 +65,47 @@ export default function Chatbot() {
     setInput('');
     setIsLoading(true);
 
+    // Retry only transient failures (network / 5xx). 4xx errors (bad input,
+    // rate limit) will fail the same way again, so fail fast on them.
     const maxRetries = 3;
     let attempt = 0;
 
     while (attempt < maxRetries) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
       try {
         const response = await fetch(RAG_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: currentInput }),
+          body: JSON.stringify({ message: currentInput, session_id: sessionIdRef.current }),
+          signal: controller.signal,
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `HTTP ${response.status}`);
+          if (response.status >= 400 && response.status < 500) {
+            throw Object.assign(new Error('client-error'), { status: response.status, noRetry: true });
+          }
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
-        const reply = data.response || data.error || 'No response received.';
-        setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+        const reply = data.response || 'No response received.';
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: reply, sources: (data.retrieved || []).slice(0, 3) },
+        ]);
         setIsLoading(false);
         return;
       } catch (err) {
         attempt++;
-        if (attempt === maxRetries) {
-          let errorMessage =
-            'Failed to connect after retries. RAG cold start may take 3–4 minutes—please try again.';
-          if (err.message) errorMessage = err.message;
-          setMessages((prev) => [...prev, { role: 'assistant', content: errorMessage }]);
+        if (err.noRetry || attempt === maxRetries) {
+          setMessages((prev) => [...prev, { role: 'assistant', content: FRIENDLY_DOWN_MESSAGE }]);
           setIsLoading(false);
         } else {
           await new Promise((r) => setTimeout(r, 1000));
         }
+      } finally {
+        clearTimeout(timeout);
       }
     }
   };
@@ -90,6 +127,12 @@ export default function Chatbot() {
           body: JSON.stringify({ jdText }),
         });
         const data = await res.json();
+        // 4xx (e.g. JD too short / too long) will fail the same way again.
+        if (!res.ok && res.status >= 400 && res.status < 500) {
+          setError(data.error || 'Analysis failed');
+          setIsLoading(false);
+          return;
+        }
         if (!res.ok) throw new Error(data.error || 'Analysis failed');
         setJdResult(data);
         setIsLoading(false);
@@ -198,6 +241,11 @@ export default function Chatbot() {
                         }`}
                       >
                         {message.content}
+                        {message.role === 'assistant' && message.sources?.length > 0 && (
+                          <p className="mt-2 border-t border-line-subtle pt-2 text-[11px] leading-relaxed text-ink-muted">
+                            Sources: {message.sources.map(formatSource).join(' · ')}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -249,6 +297,16 @@ export default function Chatbot() {
                   <div className="glass mt-3 rounded-xl p-3 text-sm">
                     <p className="font-bold text-accent-bright">{jdResult.matchScore}% fit</p>
                     <p className="mt-1 text-ink-secondary">{jdResult.pitch}</p>
+                    {jdResult.missingSkills?.length > 0 && (
+                      <p className="mt-2 text-xs text-ink-muted">
+                        Gaps to note: {jdResult.missingSkills.join(', ')}
+                      </p>
+                    )}
+                    {jdResult.exposureSkills?.length > 0 && (
+                      <p className="mt-1 text-xs text-ink-muted">
+                        Familiar, not production: {jdResult.exposureSkills.join(', ')}
+                      </p>
+                    )}
                   </div>
                 )}
                 <div className="mt-3 flex gap-2">
