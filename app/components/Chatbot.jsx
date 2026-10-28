@@ -13,6 +13,16 @@ const FRIENDLY_DOWN_MESSAGE =
   'The assistant is temporarily down — please try again in a bit, or email me at saivishnuvamsis07@gmail.com.';
 const REQUEST_TIMEOUT_MS = 60000;
 
+// Shown under the greeting (and after an abstain answer) so a first-time
+// visitor never faces a blank input. Every question is well covered by the
+// knowledge base — they steer toward answers the assistant can ground.
+const SUGGESTED_QUESTIONS = [
+  'What is your strongest project?',
+  'What did you build at Zibtek?',
+  'Where did you work before Zibtek?',
+  'What are your strongest skills?',
+];
+
 /** "experience-zibtek-ai-part-2" -> "experience: zibtek ai part 2". */
 function formatSource(source) {
   const label = String(source.id || 'source').replace(/-/g, ' ');
@@ -78,6 +88,7 @@ export default function Chatbot() {
       setMessages((prev) => [...prev, { role: 'assistant', content: '', streaming: true }]);
       let full = '';
       let done = false;
+      let abstained = false;
       let sources = [];
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -109,6 +120,7 @@ export default function Chatbot() {
               });
             } else if (payload.done) {
               done = true;
+              abstained = payload.abstained === true;
               sources = (payload.retrieved || []).slice(0, 3);
             } else if (payload.error) {
               throw new Error(payload.error);
@@ -120,7 +132,12 @@ export default function Chatbot() {
       setMessages((prev) => {
         const next = [...prev];
         const last = next[next.length - 1];
-        next[next.length - 1] = { role: 'assistant', content: full || 'No response received.', sources };
+        next[next.length - 1] = {
+          role: 'assistant',
+          content: full || 'No response received.',
+          sources,
+          abstained,
+        };
         return next;
       });
       return true;
@@ -137,16 +154,21 @@ export default function Chatbot() {
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  /**
+   * Send one question (from the input box or a suggestion chip). Chips call
+   * this directly — setInput + handleSend would not work because state
+   * updates are async.
+   */
+  const sendQuestion = async (question) => {
+    const text = (question || '').trim();
+    if (!text) return;
 
-    const userMessage = { role: 'user', content: input };
+    const userMessage = { role: 'user', content: text };
     setMessages((prev) => [...prev, userMessage]);
-    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
-    if (await tryStream(currentInput)) {
+    if (await tryStream(text)) {
       setIsLoading(false);
       return;
     }
@@ -164,7 +186,7 @@ export default function Chatbot() {
         const response = await fetch(RAG_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: currentInput, session_id: sessionIdRef.current }),
+          body: JSON.stringify({ message: text, session_id: sessionIdRef.current }),
           signal: controller.signal,
         });
 
@@ -179,7 +201,7 @@ export default function Chatbot() {
         const reply = data.response || 'No response received.';
         setMessages((prev) => [
           ...prev,
-          { role: 'assistant', content: reply, sources: (data.retrieved || []).slice(0, 3) },
+          { role: 'assistant', content: reply, sources: (data.retrieved || []).slice(0, 3), abstained: data.abstained === true },
         ]);
         setIsLoading(false);
         return;
@@ -196,6 +218,8 @@ export default function Chatbot() {
       }
     }
   };
+
+  const handleSend = () => sendQuestion(input);
 
   const analyzeJD = async () => {
     if (!jdText.trim() || jdText.length < 20) {
@@ -246,6 +270,13 @@ export default function Chatbot() {
     setIsOpen(false);
     document.getElementById('jd-match')?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Suggestion chips: before the first question, and after an abstain answer
+  // (the abstain text points at them). Hidden once a real answer lands so
+  // they never clutter an ongoing conversation.
+  const userAsked = messages.some((m) => m.role === 'user');
+  const lastMessage = messages[messages.length - 1];
+  const showChips = !userAsked || lastMessage?.abstained === true;
 
   if (!mounted) return null;
 
@@ -349,6 +380,21 @@ export default function Chatbot() {
                   )}
                 </div>
                 <div className="border-t border-line-subtle bg-surface/60 p-4">
+                  {showChips && (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {SUGGESTED_QUESTIONS.map((q) => (
+                        <button
+                          key={q}
+                          type="button"
+                          onClick={() => sendQuestion(q)}
+                          disabled={isLoading}
+                          className="rounded-full border border-line-subtle bg-surface px-3 py-1.5 text-xs text-ink-secondary transition hover:border-accent/50 hover:text-accent-bright disabled:opacity-50"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <input
                       type="text"
