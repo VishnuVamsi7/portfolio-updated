@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { springOverlay } from '../lib/motion';
 
 const RAG_ENDPOINT = 'https://chatbot-rag-mun6.onrender.com/receive';
+const RAG_STREAM_ENDPOINT = 'https://chatbot-rag-mun6.onrender.com/receive/stream';
 // Shown instead of any backend error text: a recruiter must never read
 // billing internals or stack traces as a chat message.
 const FRIENDLY_DOWN_MESSAGE =
@@ -56,6 +57,86 @@ export default function Chatbot() {
     setMounted(true);
   }, []);
 
+  /**
+   * Stream the answer via SSE so the user sees words instead of bouncing
+   * dots. Returns true when a complete streamed answer landed; false when
+   * the stream failed (caller falls back to the plain endpoint).
+   */
+  const tryStream = async (question) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      const response = await fetch(RAG_STREAM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: question, session_id: sessionIdRef.current }),
+        signal: controller.signal,
+      });
+      if (!response.ok || !response.body) return false;
+
+      // Append a placeholder assistant message; tokens fill it in.
+      setMessages((prev) => [...prev, { role: 'assistant', content: '', streaming: true }]);
+      let full = '';
+      let done = false;
+      let sources = [];
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      for (;;) {
+        const { value, done: readerDone } = await reader.read();
+        if (readerDone) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buffer.indexOf('\n\n')) !== -1) {
+          const event = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 2);
+          for (const line of event.split('\n')) {
+            if (!line.startsWith('data: ')) continue;
+            let payload;
+            try {
+              payload = JSON.parse(line.slice(6));
+            } catch {
+              continue;
+            }
+            if (payload.token) {
+              full += payload.token;
+              const text = full;
+              setMessages((prev) => {
+                const next = [...prev];
+                const last = next[next.length - 1];
+                next[next.length - 1] = { ...last, content: text };
+                return next;
+              });
+            } else if (payload.done) {
+              done = true;
+              sources = (payload.retrieved || []).slice(0, 3);
+            } else if (payload.error) {
+              throw new Error(payload.error);
+            }
+          }
+        }
+      }
+      if (!done) return false;
+      setMessages((prev) => {
+        const next = [...prev];
+        const last = next[next.length - 1];
+        next[next.length - 1] = { role: 'assistant', content: full || 'No response received.', sources };
+        return next;
+      });
+      return true;
+    } catch {
+      // Drop the partial placeholder; the caller retries non-streaming.
+      setMessages((prev) => {
+        const next = [...prev];
+        if (next.length && next[next.length - 1].streaming) next.pop();
+        return next;
+      });
+      return false;
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -65,6 +146,12 @@ export default function Chatbot() {
     setInput('');
     setIsLoading(true);
 
+    if (await tryStream(currentInput)) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Fallback: plain /receive with retries on transient failures only.
     // Retry only transient failures (network / 5xx). 4xx errors (bad input,
     // rate limit) will fail the same way again, so fail fast on them.
     const maxRetries = 3;
