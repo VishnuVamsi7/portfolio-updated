@@ -201,10 +201,46 @@ function scoreExperience(exp, jdTerms, matchedSkills) {
 // ---------------------------------------------------------------------------
 
 const SECTION_HEADERS = {
-  required: /^(requirements?|qualifications?|what you('ll| will) (bring|need)|must[- ]have|essential|minimum qualifications?|required skills?)/i,
+  // NOTE: "Required Qualifications:" must match here. It previously did
+  // not (the pattern only knew "Requirements"/"Required Skills"), so a JD
+  // using that heading — e.g. Lenovo WD00106424 — had its whole Required
+  // section silently skipped and scored 28% on the Preferred section alone.
+  required: /^(requirements?|required(\s+(qualifications?|skills?|experience))?|qualifications?|what you('ll| will) (bring|need)|what we('re| are) looking for|must[- ]have|essential|minimum qualifications?)/i,
   preferred: /^(preferred|nice[- ]to[- ]have|bonus|plus|desired|ideal|preferred qualifications?)/i,
   responsibilities: /^(responsibilities|what you('ll| will) do|day[- ]to[- ]day|about the role|the role)/i,
 };
+
+/**
+ * Lines that are boilerplate, not requirements — they must never become
+ * scored rows. EEO paragraphs and bare location lists ("United States of
+ * America - North Carolina - Morrisville") previously scored as preferred
+ * gaps, dragging the Lenovo score down for no reason.
+ */
+function isBoilerplate(line) {
+  const n = normalize(line);
+  if (/equal opportunity|do not discriminate|discrimination/i.test(line)) return true;
+  if (/encouraged to apply/i.test(line)) return true;
+  if (/^additional locations?/i.test(line)) return true;
+  // Bare location list with no requirement verb and no remote/hybrid/onsite
+  // mode: "United States of America - North Carolina - Morrisville".
+  if (
+    /^(united states of america|usa|u\.?s\.?)\b/i.test(line) &&
+    !/\b(remote|hybrid|onsite|on-site|relocat)/i.test(line) &&
+    !/\b(python|rag|ai|ml|cloud|engineer|developer)\b/i.test(line)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * A requirement that asks only for familiarity / basic knowledge / exposure
+ * is satisfied by familiarity — it must NOT be scored as a production
+ * requirement. Exposure-tier skills (PyTorch, TensorFlow) are gaps only
+ * when the JD asks for production work in them, never when it asks for
+ * "familiarity with" them.
+ */
+const FAMILIARITY_RE = /\b(familiarity with|familiar with|basic (knowledge|understanding)|exposure to|awareness of|understanding of|knowledge of)\b/i;
 
 const YEARS_RE = /(\d+)\s*\+?\s*(?:years?|yrs?)\b/i;
 const DEGREE_RE = /\b(ph\.?d\.?|master'?s|bachelor'?s|b\.?s\.?|m\.?s\.?|degree)\b/i;
@@ -268,6 +304,7 @@ function extractRequirements(jdText, { matchedSkills, exposureSkills }) {
     const clean = cleanBullet(text).slice(0, 220);
     const key = normalize(clean);
     if (!clean || clean.length < 4 || seen.has(key)) return;
+    if (isBoilerplate(clean)) return;
     seen.add(key);
     // A "preferred" item listed inside the Requirements section is still preferred.
     if (/\b(preferred|nice[- ]to[- ]have|bonus|a plus)\b/i.test(clean)) required = false;
@@ -324,15 +361,91 @@ function evidenceForSkill(skill, projectResults, experienceResults) {
   const exp = experienceResults.find((e) =>
     e.reasons.some((r) => r.toLowerCase().includes(n))
   );
-  if (exp) return { type: 'role', name: `${exp.title} @ ${exp.company}` };
+  // experienceResults carry the role under `.item`, not at top level —
+  // using exp.title directly rendered "undefined @ undefined" in the table.
+  if (exp) return { type: 'role', name: `${exp.item.title} @ ${exp.item.company}` };
+  return null;
+}
+
+/**
+ * Evidence for a generic (non-skill) requirement row, from real profile
+ * text — not from the JD's words alone. Returns null when nothing in the
+ * profile supports the row, so unsupported rows still score as gaps.
+ * Previously every 'other' row scored as a gap, so "internship / research
+ * experience" and "AI projects" failed even though the profile holds a
+ * Handshake research fellowship, an NLP research assistantship, and
+ * production RAG projects.
+ */
+function genericRowEvidence(rowText) {
+  const t = rowText.toLowerCase();
+  // Title only: "Fellow" alone (e.g. Software Engineering Fellow) is not
+  // research experience — Handshake "AI Researcher Fellow" and Grandios
+  // "AI Research Intern" are, and they must win over the Fellow title.
+  const researchRole = profile.experience.find((e) =>
+    /research|intern/i.test(e.title)
+  );
+  if (/\b(internship|research|academic project)\b/.test(t) && researchRole) {
+    return {
+      status: 'evidenced',
+      evidence: [`${researchRole.title} @ ${researchRole.company}`],
+      note: 'research / internship experience in profile',
+    };
+  }
+  if (/\b(rpa|robotic process automation)\b/.test(t)) {
+    const automation = profile.projects.find((p) =>
+      /automat|agent/i.test(`${p.title} ${p.goal || ''} ${p.outcome || ''}`)
+    );
+    if (automation) {
+      return {
+        status: 'partial',
+        evidence: [automation.title],
+        note: 'workflow automation + AI agents evidenced; RPA tools (e.g. UiPath) not in profile',
+      };
+    }
+    return null;
+  }
+  if (/\b(apis?|data pipelines?)\b/.test(t)) {
+    const apiRole = profile.experience.find((e) =>
+      (e.skills || []).some((s) => /fastapi|rest apis/i.test(s))
+    );
+    if (apiRole) {
+      return {
+        status: 'evidenced',
+        evidence: [`${apiRole.title} @ ${apiRole.company}`],
+        note: 'FastAPI / API delivery in profile',
+      };
+    }
+    return null;
+  }
+  if (/\b(ai projects?|automation solutions?|process improvement)\b/.test(t)) {
+    const project = profile.projects.find((p) => /rag|ai/i.test(p.title));
+    if (project) {
+      return {
+        status: 'evidenced',
+        evidence: [project.title],
+        note: 'production AI projects in profile',
+      };
+    }
+    return null;
+  }
+  if (/\b(collaborat|cross-functional|teamwork)\b/.test(t)) {
+    return {
+      status: 'partial',
+      evidence: [],
+      note: 'team-based delivery roles in profile; soft skill, not directly evidenced',
+    };
+  }
   return null;
 }
 
 /**
  * Scorer (deterministic): one verdict per requirement.
  * status: 'evidenced' (1.0) | 'partial' (0.5) | 'gap' (0).
- * An exposure-tier skill can never satisfy a requirement — it is a gap by
- * construction, which is what fixes the PyTorch JD scoring 62-68.
+ * An exposure-tier skill can never satisfy a PRODUCTION requirement — it
+ * is a gap by construction, which is what fixes the PyTorch JD scoring
+ * 62-68. But when the JD asks only for familiarity / basic knowledge /
+ * exposure, familiarity satisfies it (Lenovo WD00106424); scoring that as
+ * a gap was the second Lenovo bug.
  */
 function scoreRequirements(rows, projectResults, experienceResults, matchedSkills, roleAdj) {
   const table = [];
@@ -342,8 +455,16 @@ function scoreRequirements(rows, projectResults, experienceResults, matchedSkill
     let note = '';
 
     if (row.kind === 'skill') {
+      const familiarityOnly = FAMILIARITY_RE.test(row.text);
       const verdicts = row.skills.map((skill) => {
         if (getSkillTier(skill) === 'exposure') {
+          if (familiarityOnly) {
+            return {
+              skill,
+              status: 'evidenced',
+              note: 'familiarity — JD asks for familiarity, not production',
+            };
+          }
           return { skill, status: 'gap', note: 'familiar, not production' };
         }
         if (!matchedSkills.includes(skill)) {
@@ -358,6 +479,10 @@ function scoreRequirements(rows, projectResults, experienceResults, matchedSkill
       else if (ok.length) status = 'partial';
       evidence = ok.map((v) => v.evidence).filter(Boolean);
       note = bad.map((v) => `${v.skill}: ${v.note}`).join('; ');
+      if (!note && familiarityOnly) {
+        const fam = ok.filter((v) => v.note).map((v) => `${v.skill}: ${v.note}`).join('; ');
+        if (fam) note = fam;
+      }
       if (!row.skills.length) {
         status = 'gap';
         note = 'no recognized skill in this requirement';
@@ -410,10 +535,18 @@ function scoreRequirements(rows, projectResults, experienceResults, matchedSkill
         note = `${PROFILE_YEARS_NOTE} — staff/principal is above current level`;
       }
     } else {
-      // 'other' rows: no deterministic evidence — partial only if the words
-      // overlap his profile text, else a gap.
-      status = 'gap';
-      note = 'no direct evidence in profile';
+      // 'other' rows: check real profile evidence for generic phrasing
+      // (research/internship, AI projects, APIs/pipelines, RPA, teamwork)
+      // before falling back to a gap.
+      const generic = genericRowEvidence(row.text);
+      if (generic) {
+        status = generic.status;
+        evidence = generic.evidence;
+        note = generic.note;
+      } else {
+        status = 'gap';
+        note = 'no direct evidence in profile';
+      }
     }
 
     table.push({ ...row, status, evidence: [...new Set(evidence)].slice(0, 2), note });
@@ -538,11 +671,16 @@ export function matchJD(jdText) {
   let matchScore = derived;
   // A required core skill he only has exposure to (PyTorch, TF, K8s) can
   // never be a good fit, however many other rows match: cap at 45.
+  // "Not evidenced" includes partial rows: a row like "Production
+  // PyTorch + Deep Learning" scores partial on Deep Learning while its
+  // PyTorch verdict is still a gap, and the old status === 'gap' check
+  // let that bypass the cap entirely (67% on a PyTorch-required JD).
+  // Familiarity rows that score evidenced are exempt by construction.
   const exposureGap = requirements.some(
     (r) =>
       r.required &&
       r.kind === 'skill' &&
-      r.status === 'gap' &&
+      r.status !== 'evidenced' &&
       (r.skills || []).some((s) => getSkillTier(s) === 'exposure')
   );
   if (exposureGap && matchScore > 45) {
@@ -569,7 +707,7 @@ export function matchJD(jdText) {
     pitch,
     matchedSkills: topSkills,
     exposureSkills,
-    missingSkills: findMissingSkills(matchedSkills, jdText),
+    missingSkills: findMissingSkills(matchedSkills, jdText, requirements),
     projects: topProjects,
     experience: topExperience.map((e) => ({
       id: e.item.id,
@@ -585,7 +723,7 @@ export function matchJD(jdText) {
   };
 }
 
-function findMissingSkills(found, jdText) {
+function findMissingSkills(found, jdText, requirements = []) {
   const n = normalize(jdText);
   const core = ['Python', 'Machine Learning', 'RAG', 'TensorFlow', 'PyTorch', 'Docker', 'FastAPI', 'TypeScript'];
   // "Machine Learning" is not a taxonomy entry, so it can never be "found"
@@ -593,9 +731,20 @@ function findMissingSkills(found, jdText) {
   const mlCovered = ['Deep Learning', 'Scikit-learn', 'Model Tuning', 'Reinforcement Learning'].some((s) =>
     found.includes(s)
   );
+  // A skill the requirement table marks evidenced/partial (e.g. PyTorch
+  // under a "familiarity with" row) is NOT a gap, even though it is
+  // exposure-tier and therefore never in `found`. Without this, the
+  // Lenovo JD listed TensorFlow/PyTorch as "Gaps to note" while the same
+  // page marked their row evidenced.
+  const tableSatisfied = new Set(
+    (requirements || [])
+      .filter((r) => r.status === 'evidenced' || r.status === 'partial')
+      .flatMap((r) => r.skills || [])
+  );
   return core
     .filter((s) => {
       if (s === 'Machine Learning' && mlCovered) return false;
+      if (tableSatisfied.has(s)) return false;
       return !found.includes(s) && hasPhrase(n, s.toLowerCase());
     })
     .slice(0, 4);

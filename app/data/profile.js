@@ -133,12 +133,14 @@ export function getSkillTaxonomy() {
     // light up Python, Deep Learning, or Docker when a JD mentions them.)
     'deep learning': ['deep learning', 'neural network', 'cnn', 'rnn', 'transformer', 'unet'],
     python: ['python', 'scikit-learn', 'pandas', 'fastapi', 'numpy'],
-    rag: ['rag', 'retrieval', 'llm', 'langchain', 'groq', 'prompt engineering', 'faiss', 'vector search', 'onnx'],
+    rag: ['rag', 'retrieval', 'llm', 'llms', 'langchain', 'groq', 'prompt engineering', 'faiss', 'vector search', 'onnx'],
     nlp: ['nlp', 'natural language', 'text processing', 'whisper', 'sentiment', 'tf-idf', 'topic modeling'],
     'computer vision': ['computer vision', 'yolo', 'yolov5', 'opencv', 'stable diffusion'],
     docker: ['docker', 'container', 'docker compose'],
     // Keep aliases specific — bare "cloud" / "database" cause false JD hits.
-    azure: ['azure', 'azure ml', 'microsoft azure'],
+    // Key must be the skill name "Azure ML": the old key "azure" never
+    // matched that skill, so a JD saying just "Azure" scored no cloud hit.
+    'azure ml': ['azure', 'azure ml', 'microsoft azure'],
     sql: ['sql'],
     javascript: ['javascript', 'typescript', 'js', 'ts'],
     react: ['react', 'react.js', 'reactjs'],
